@@ -134,7 +134,7 @@ export async function middleware(request: NextRequest) {
     // Parse form body
     const body = await request.text();
     const params = new URLSearchParams(body);
-    const submitted = params.get('password') ?? '';
+    const submitted = (params.get('password') ?? '').trim();
 
     // Fetch stored password from Supabase (server-side only)
     const stored = await getStoredPassword();
