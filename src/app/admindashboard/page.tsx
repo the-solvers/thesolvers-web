@@ -128,6 +128,13 @@ const sel: React.CSSProperties = {
   paddingRight: '28px',
 };
 
+const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div style={{ marginBottom: '1rem' }}>
+    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
+    {children}
+  </div>
+);
+
 // ── Edit Modal ─────────────────────────────────────────────────
 function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose: () => void; onSaved: () => void }) {
   const [form, setForm] = useState({
@@ -176,13 +183,6 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
     borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '520px',
     maxHeight: '90vh', overflowY: 'auto',
   };
-
-  const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div style={{ marginBottom: '1rem' }}>
-      <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div style={overlay} onClick={onClose}>
@@ -583,43 +583,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── COMING SOON TAB ───────────────────────────────── */}
-        {activeTab === 'coming_soon' && (
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700, marginBottom: '1.5rem' }}>Coming Soon ({comingSoon.length})</h2>
-
-            <div style={{ ...cardStyle, marginBottom: '1.5rem' }}>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>Add New</p>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                  style={{ ...inp, flex: 1 }}
-                  placeholder="Brand / product name"
-                  value={newComingSoon}
-                  onChange={e => setNewComingSoon(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && addComingSoon()}
-                />
-                <button style={btnPrimary} onClick={addComingSoon}>Add</button>
-              </div>
-              {csMsg && <p style={{ marginTop: '8px', fontSize: '12px', color: csMsg.startsWith('Error') ? '#b93a3a' : '#4a9e6b', fontWeight: 600 }}>{csMsg}</p>}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {comingSoon.map(item => (
-                <div key={item.id} style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{item.name}</span>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '10px' }}>Added {formatDate(item.created_at)}</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                    <button style={btnGhost} onClick={() => editComingSoon(item.id, item.name)}>✏ Edit</button>
-                    <button style={btnDanger} onClick={() => deleteComingSoon(item.id, item.name)}>🗑 Remove</button>
-                  </div>
-                </div>
-              ))}
-              {comingSoon.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Koi coming soon item nahi hai.</p>}
-            </div>
-          </div>
-        )}
 
         {/* ── BLOGS TAB ─────────────────────────────────────── */}
         {activeTab === 'blogs' && (
