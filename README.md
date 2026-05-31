@@ -37,7 +37,6 @@ The website serves as the central hub: showcasing solutions, publishing weekly b
 | `/` | Home — hero, solutions grid, newsletter |
 | `/blog` | Blog listing — fetched from Supabase |
 | `/contact` | Contact page with form connected to Supabase |
-| `/createadminblogs` | Admin editor to write and publish blog posts |
 
 ## Database Tables
 
