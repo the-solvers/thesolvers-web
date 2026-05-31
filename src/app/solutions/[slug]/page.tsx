@@ -15,7 +15,6 @@ type Solution = {
   status: string;
   progress: number;
   users: number;
-  monthly_growth: number;
   valuation: string;
   milestones: Milestone[];
   url?: string;
@@ -35,6 +34,7 @@ const statusColor: Record<string, { bg: string; color: string }> = {
   building:   { bg: 'rgba(184,120,42,0.15)', color: '#b8782a' },
   planned:    { bg: 'rgba(138,136,128,0.15)', color: '#8a8880' },
   paused:     { bg: 'rgba(201,74,74,0.15)',   color: '#c94a4a' },
+  'coming-soon': { bg: 'var(--accent-dim)', color: 'var(--accent)' },
 };
 
 export default function SolutionPage() {
@@ -196,7 +196,7 @@ export default function SolutionPage() {
             marginBottom: '20px',
           }}>
             {[
-              { label: 'Users', value: (solution.users ?? 0).toLocaleString(), sub: solution.monthly_growth > 0 ? `↗ +${solution.monthly_growth}% this month` : '→ +0% this month' },
+              { label: 'Users', value: (solution.users ?? 0).toLocaleString(), sub: 'Total active users' },
               { label: 'Valuation', value: solution.valuation || '$0.0M', sub: solution.valuation_since ? `Since ${solution.valuation_since}` : 'Early stage' },
               { label: 'Week', value: solution.week_number ? `Week ${solution.week_number}` : '—', sub: 'Build journey' },
               { label: 'Last Update', value: formatDate(dateStr).split(',')[0], sub: formatDate(dateStr).split(',').slice(1).join(',').trim() },
@@ -280,7 +280,7 @@ export default function SolutionPage() {
                   Milestones
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {milestones.map((m, i) => (
+                  {[...milestones].sort((a, b) => (a.done === b.done ? 0 : a.done ? -1 : 1)).map((m, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px' }}>
                       {m.done ? (
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a9e6b" strokeWidth="2.5">
@@ -303,7 +303,24 @@ export default function SolutionPage() {
           </div>
 
           {/* CTA */}
-          {solution.url && (
+          {solution.status === 'coming-soon' ? (
+            <div style={{
+              background: 'var(--bg-card)',
+              border: '1px dashed var(--accent)',
+              borderRadius: '16px',
+              padding: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{
+                fontSize: '14px', fontWeight: 600, color: 'var(--accent)',
+                textTransform: 'uppercase', letterSpacing: '0.1em',
+              }}>
+                ⏳ Coming Soon
+              </span>
+            </div>
+          ) : solution.url && (
             <div style={{
               background: 'var(--accent-dim)',
               border: '1px solid var(--accent)',

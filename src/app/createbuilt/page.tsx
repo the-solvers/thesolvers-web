@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 const CATEGORIES = ['Productivity', 'Health', 'Finance', 'Education', 'Developer Tools', 'Social', 'Environment', 'Other'];
-const STATUSES = ['on-track', 'building', 'live', 'planned', 'paused'];
+const STATUSES = ['on-track', 'building', 'live', 'planned', 'paused', 'coming-soon'];
 
 type Milestone = { label: string; done: boolean };
 
@@ -128,6 +128,7 @@ export default function CreateBuiltPage() {
     if (s === 'on-track' || s === 'live') return { bg: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)' };
     if (s === 'building') return { bg: 'rgba(168,85,247,0.15)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' };
     if (s === 'paused') return { bg: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' };
+    if (s === 'coming-soon') return { bg: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' };
     return { bg: 'rgba(255,255,255,0.08)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.12)' };
   };
 
@@ -387,7 +388,6 @@ export default function CreateBuiltPage() {
                 <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
                   {parseInt(users) || 0}
                 </div>
-                <div style={{ fontSize: '11px', color: '#22c55e' }}>↗ +0% this month</div>
               </div>
               <div style={{ background: 'var(--bg)', borderRadius: '10px', padding: '12px' }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px' }}>Valuation</div>
@@ -405,7 +405,7 @@ export default function CreateBuiltPage() {
               <div style={{ marginBottom: '1.2rem' }}>
                 <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '10px' }}>Milestones</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {milestones.map((m, i) => (
+                  {[...milestones].sort((a, b) => (a.done === b.done ? 0 : a.done ? -1 : 1)).map((m, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {m.done
                         ? <span style={{ fontSize: '16px', color: '#22c55e' }}>✅</span>
@@ -434,9 +434,20 @@ export default function CreateBuiltPage() {
               </span>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent)', cursor: 'pointer' }}>
-                View Details →
-              </span>
+              {status === 'coming-soon' ? (
+                <span style={{
+                  fontSize: '11px', fontWeight: 600, color: 'var(--accent)',
+                  background: 'var(--accent-dim)', padding: '4px 10px',
+                  borderRadius: '100px', textTransform: 'uppercase',
+                  letterSpacing: '0.04em', display: 'inline-block'
+                }}>
+                  Coming Soon
+                </span>
+              ) : (
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent)', cursor: 'pointer' }}>
+                  View Details →
+                </span>
+              )}
             </div>
           </div>
         </div>

@@ -13,7 +13,6 @@ type Solution = {
   status: string;
   progress: number;
   users: number;
-  monthly_growth: number;
   valuation: string;
   milestones: Milestone[];
   url?: string;
@@ -51,7 +50,9 @@ const statusColor: Record<string, { bg: string; color: string }> = {
   building:   { bg: 'rgba(184,120,42,0.15)', color: '#b8782a' },
   planned:    { bg: 'rgba(138,136,128,0.15)', color: '#8a8880' },
   paused:     { bg: 'rgba(201,74,74,0.15)',   color: '#c94a4a' },
+  'coming-soon': { bg: 'var(--accent-dim)', color: 'var(--accent)' },
 };
+
 
 const fmt = (n: number | null) =>
   n === null ? '—' : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n.toLocaleString();
@@ -59,7 +60,7 @@ const fmt = (n: number | null) =>
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-const STATUSES = ['on-track', 'building', 'live', 'planned', 'paused'];
+const STATUSES = ['on-track', 'building', 'live', 'planned', 'paused', 'coming-soon'];
 
 // ── Shared Styles ──────────────────────────────────────────────
 const cardStyle: React.CSSProperties = {
@@ -135,11 +136,11 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
     status: solution.status,
     progress: String(solution.progress ?? 0),
     users: String(solution.users ?? 0),
-    monthly_growth: String(solution.monthly_growth ?? 0),
     valuation: solution.valuation ?? '',
     url: solution.url ?? '',
     last_update: solution.last_update ?? '',
   });
+  const [milestones, setMilestones] = useState<Milestone[]>(Array.isArray(solution.milestones) ? solution.milestones : []);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -153,9 +154,9 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         status: form.status,
         progress: Number(form.progress),
         users: Number(form.users),
-        monthly_growth: Number(form.monthly_growth),
         valuation: form.valuation,
         url: form.url,
+        milestones: milestones,
         last_update: form.last_update || new Date().toISOString().split('T')[0],
       })
       .eq('id', solution.id);
@@ -209,9 +210,6 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
           <Row label="Users">
             <input style={inp} type="number" min="0" value={form.users} onChange={e => setForm(f => ({ ...f, users: e.target.value }))} />
           </Row>
-          <Row label="Monthly Growth (%)">
-            <input style={inp} type="number" value={form.monthly_growth} onChange={e => setForm(f => ({ ...f, monthly_growth: e.target.value }))} />
-          </Row>
           <Row label="Valuation">
             <input style={inp} value={form.valuation} onChange={e => setForm(f => ({ ...f, valuation: e.target.value }))} placeholder="e.g. $0.5M" />
           </Row>
@@ -221,6 +219,48 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         </Row>
         <Row label="Last Update">
           <input style={inp} type="date" value={form.last_update?.split('T')[0] ?? ''} onChange={e => setForm(f => ({ ...f, last_update: e.target.value }))} />
+        </Row>
+
+        <Row label="Milestones">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {milestones.map((m, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  checked={m.done}
+                  onChange={e => {
+                    const newM = [...milestones];
+                    newM[i] = { ...newM[i], done: e.target.checked };
+                    setMilestones(newM);
+                  }}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                />
+                <input
+                  style={{ ...inp, flex: 1, padding: '6px 10px' }}
+                  value={m.title || m.label || ''}
+                  placeholder="Milestone title..."
+                  onChange={e => {
+                    const newM = [...milestones];
+                    newM[i] = { ...newM[i], label: e.target.value, title: e.target.value };
+                    setMilestones(newM);
+                  }}
+                />
+                <button
+                  style={{ ...btnDanger, padding: '6px 10px', fontSize: '14px' }}
+                  onClick={() => setMilestones(milestones.filter((_, idx) => idx !== i))}
+                  title="Remove"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            <button
+              style={{ ...btnGhost, alignSelf: 'flex-start', marginTop: '4px' }}
+              onClick={() => setMilestones([...milestones, { label: '', done: false }])}
+            >
+              + Add Milestone
+            </button>
+          </div>
         </Row>
 
         {msg && (
@@ -263,15 +303,12 @@ const MoonIcon = () => (
 // ── Main Dashboard ─────────────────────────────────────────────
 export default function AdminDashboard() {
   const [solutions, setSolutions]     = useState<Solution[]>([]);
-  const [comingSoon, setComingSoon]   = useState<ComingSoonItem[]>([]);
   const [blogs, setBlogs]             = useState<Blog[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading]         = useState(true);
-  const [activeTab, setActiveTab]     = useState<'overview' | 'solutions' | 'coming_soon' | 'blogs' | 'subscribers'>('overview');
+  const [activeTab, setActiveTab]     = useState<'overview' | 'solutions' | 'blogs' | 'subscribers'>('overview');
   const [editingSolution, setEditingSolution] = useState<Solution | null>(null);
   const [deleteMsg, setDeleteMsg]     = useState('');
-  const [newComingSoon, setNewComingSoon] = useState('');
-  const [csMsg, setCsMsg]             = useState('');
   const [dark, setDark]               = useState(false);
 
   // Restore saved theme on mount
@@ -291,14 +328,12 @@ export default function AdminDashboard() {
 
   const loadAll = async () => {
     setLoading(true);
-    const [{ data: sols }, { data: cs }, { data: bl }, { data: subs }] = await Promise.all([
+    const [{ data: sols }, { data: bl }, { data: subs }] = await Promise.all([
       supabase.from('solutions').select('*').order('created_at', { ascending: true }),
-      supabase.from('coming_soon').select('*').order('created_at', { ascending: false }),
       supabase.from('blogs').select('id,title,slug,published,created_at,author').order('created_at', { ascending: false }),
       supabase.from('subscribers').select('*').order('created_at', { ascending: false }),
     ]);
     setSolutions(sols || []);
-    setComingSoon(cs || []);
     setBlogs(bl || []);
     setSubscribers(subs || []);
     setLoading(false);
@@ -320,23 +355,6 @@ export default function AdminDashboard() {
     setTimeout(() => setDeleteMsg(''), 3000);
   };
 
-  // Delete coming soon
-  const deleteComingSoon = async (id: number, name: string) => {
-    if (!confirm(`"${name}" remove karna hai?`)) return;
-    await supabase.from('coming_soon').delete().eq('id', id);
-    loadAll();
-  };
-
-  // Add coming soon
-  const addComingSoon = async () => {
-    if (!newComingSoon.trim()) return;
-    const { error } = await supabase.from('coming_soon').insert({ name: newComingSoon.trim() });
-    if (error) { setCsMsg('Error: ' + error.message); return; }
-    setCsMsg('Added!');
-    setNewComingSoon('');
-    loadAll();
-    setTimeout(() => setCsMsg(''), 2000);
-  };
 
   // Toggle blog publish
   const toggleBlogPublish = async (id: number, current: boolean) => {
@@ -427,12 +445,12 @@ export default function AdminDashboard() {
       {/* Tabs */}
       <div style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-card)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem', display: 'flex', gap: '0', overflowX: 'auto' }}>
-          {(['overview', 'solutions', 'coming_soon', 'blogs', 'subscribers'] as const).map(tab => (
+          {(['overview', 'solutions', 'blogs', 'subscribers'] as const).map(tab => (
             <button key={tab} style={tabBtn(tab)} onClick={() => setActiveTab(tab)}>
-              {tab === 'coming_soon' ? 'Coming Soon' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {tab !== 'overview' && (
                 <span style={{ marginLeft: '6px', fontSize: '10px', background: 'var(--border)', borderRadius: '100px', padding: '1px 6px', color: 'var(--text-muted)' }}>
-                  {tab === 'solutions' ? solutions.length : tab === 'coming_soon' ? comingSoon.length : tab === 'blogs' ? blogs.length : subscribers.length}
+                  {tab === 'solutions' ? solutions.length : tab === 'blogs' ? blogs.length : subscribers.length}
                 </span>
               )}
             </button>
@@ -447,15 +465,15 @@ export default function AdminDashboard() {
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px', marginBottom: '2rem' }}>
               {[
-                { label: 'Total Solutions', value: solutions.length, icon: '🧩' },
-                { label: 'Live Products',   value: liveSols,          icon: '🟢' },
-                { label: 'Total Users',     value: fmt(totalUsers),   icon: '👥' },
-                { label: 'Coming Soon',     value: comingSoon.length, icon: '⏳' },
-                { label: 'Blog Posts',      value: blogs.length,      icon: '📝' },
-                { label: 'Subscribers',     value: subscribers.length,icon: '📧' },
+                { label: 'Total Solutions', value: solutions.length, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> },
+                { label: 'Live Products',   value: liveSols,         icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a9e6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> },
+                { label: 'Total Users',     value: fmt(totalUsers),  icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                { label: 'Coming Soon',     value: solutions.filter(s => s.status === 'coming-soon').length, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+                { label: 'Blog Posts',      value: blogs.length,     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> },
+                { label: 'Subscribers',     value: subscribers.length,icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> },
               ].map((s, i) => (
                 <div key={i} style={cardStyle}>
-                  <div style={{ fontSize: '22px', marginBottom: '8px' }}>{s.icon}</div>
+                  <div style={{ marginBottom: '12px' }}>{s.icon}</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>{s.value}</div>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{s.label}</div>
                 </div>
@@ -467,7 +485,6 @@ export default function AdminDashboard() {
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 {[
                   { label: '+ Add Solution',    href: '/createbuilt',      primary: true  },
-                  { label: '+ Add Coming Soon', href: '/createcomingsoon', primary: true  },
                   { label: '+ Write Blog',      href: '/createadminblogs', primary: true  },
                   { label: '→ View Site',       href: '/',                 primary: false },
                   { label: '→ View Blog',       href: '/blog',             primary: false },
@@ -542,7 +559,6 @@ export default function AdminDashboard() {
                       {[
                         { label: 'Progress',    value: `${s.progress ?? 0}%` },
                         { label: 'Users',       value: fmt(s.users ?? 0) },
-                        { label: 'Growth',      value: `+${s.monthly_growth ?? 0}%` },
                         { label: 'Valuation',   value: s.valuation || '—' },
                         { label: 'Milestones',  value: `${doneMilestones}/${milestones.length}` },
                         { label: 'Last Update', value: s.last_update ? formatDate(s.last_update) : '—' },
@@ -589,12 +605,15 @@ export default function AdminDashboard() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {comingSoon.map(item => (
-                <div key={item.id} style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                  <div>
+                <div key={item.id} style={{ ...cardStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1 }}>
                     <span style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{item.name}</span>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '10px' }}>Added {formatDate(item.created_at)}</span>
                   </div>
-                  <button style={btnDanger} onClick={() => deleteComingSoon(item.id, item.name)}>Remove</button>
+                  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <button style={btnGhost} onClick={() => editComingSoon(item.id, item.name)}>✏ Edit</button>
+                    <button style={btnDanger} onClick={() => deleteComingSoon(item.id, item.name)}>🗑 Remove</button>
+                  </div>
                 </div>
               ))}
               {comingSoon.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Koi coming soon item nahi hai.</p>}

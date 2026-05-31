@@ -12,7 +12,6 @@ type Solution = {
   status: string;
   progress: number;
   users: number;
-  monthly_growth: number;
   valuation: string;
   milestones: Milestone[];
   url?: string;
@@ -26,6 +25,7 @@ const statusColor: Record<string, { bg: string; color: string }> = {
   building:   { bg: 'rgba(184,120,42,0.15)', color: '#b8782a' },
   planned:    { bg: 'rgba(138,136,128,0.15)', color: '#8a8880' },
   paused:     { bg: 'rgba(201,74,74,0.15)',   color: '#c94a4a' },
+  'coming-soon': { bg: 'var(--accent-dim)', color: 'var(--accent)' },
 };
 
 const selectStyle: React.CSSProperties = {
@@ -47,7 +47,6 @@ const selectStyle: React.CSSProperties = {
 export default function SolutionsGrid() {
   const [solutions, setSolutions]     = useState<Solution[]>([]);
   const [loading, setLoading]         = useState(true);
-  const [comingSoon, setComingSoon]   = useState<string[]>([]);
 
   // Filters
   const [yearFilter,   setYearFilter]   = useState('All Years');
@@ -62,15 +61,7 @@ export default function SolutionsGrid() {
       setSolutions(data || []);
       setLoading(false);
     };
-    const fetchComingSoon = async () => {
-      const { data } = await supabase
-        .from('coming_soon')
-        .select('name')
-        .order('created_at', { ascending: true });
-      setComingSoon((data || []).map((d: { name: string }) => d.name));
-    };
     fetchData();
-    fetchComingSoon();
   }, []);
 
   // helper: pick the best date field
@@ -91,16 +82,11 @@ export default function SolutionsGrid() {
       if (yr?.toString() !== yearFilter) return false;
     }
     // Status filter
-    if (statusFilter !== 'All' && statusFilter !== 'Coming Soon') {
+    if (statusFilter !== 'All') {
       if (s.status.toLowerCase() !== statusFilter.toLowerCase()) return false;
     }
     return true;
   });
-
-  // Show coming soon section only when "All" or "Coming Soon" selected
-  const showComingSoon = statusFilter === 'All' || statusFilter === 'Coming Soon';
-  // When "Coming Soon" selected, hide main cards
-  const showMainCards = statusFilter !== 'Coming Soon';
 
   return (
     <section id="solutions" className="solutions-section" style={{ padding: '0 2rem 100px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -139,7 +125,7 @@ export default function SolutionsGrid() {
             <option value="planned">Planned</option>
             <option value="on-track">On Track</option>
             <option value="paused">Paused</option>
-            <option value="Coming Soon">Coming Soon</option>
+            <option value="coming-soon">Coming Soon</option>
           </select>
 
         </div>
@@ -148,11 +134,11 @@ export default function SolutionsGrid() {
       {/* Main Cards Grid */}
       {loading ? (
         <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading…</p>
-      ) : showMainCards && filtered.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
           No solutions match this filter.
         </p>
-      ) : showMainCards ? (
+      ) : (
         <div className="solutions-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
@@ -162,6 +148,7 @@ export default function SolutionsGrid() {
             const st = statusColor[s.status] || statusColor['planned'];
             const milestones: Milestone[] = Array.isArray(s.milestones) ? s.milestones : [];
             const dateStr = s.last_update || s.updated_at || new Date().toISOString();
+            const isComingSoon = s.status === 'coming-soon';
             return (
               <div key={s.id} style={{
                 background: 'var(--bg-card)',
@@ -170,6 +157,7 @@ export default function SolutionsGrid() {
                 padding: '1.5rem',
                 display: 'flex', flexDirection: 'column', gap: '1.1rem',
                 transition: 'transform 0.2s, border-color 0.2s',
+                height: '100%',
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)';
@@ -187,7 +175,7 @@ export default function SolutionsGrid() {
                       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
                         {s.name}
                       </h3>
-                      {s.url && (
+                      {s.url && !isComingSoon && (
                         <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', display: 'flex' }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -236,9 +224,6 @@ export default function SolutionsGrid() {
                     <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '4px' }}>
                       {(s.users ?? 0).toLocaleString()}
                     </div>
-                    <div style={{ fontSize: '12px', color: s.monthly_growth > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
-                      {s.monthly_growth > 0 ? `↗ +${s.monthly_growth}%` : `→ +0%`} this month
-                    </div>
                   </div>
                   <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px' }}>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>Valuation</div>
@@ -253,10 +238,10 @@ export default function SolutionsGrid() {
 
                 {/* Milestones */}
                 {milestones.length > 0 && (
-                  <div>
+                  <div style={{ flexGrow: 1 }}>
                     <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>Milestones</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-                      {milestones.map((m, i) => (
+                      {[...milestones].sort((a, b) => (a.done === b.done ? 0 : a.done ? -1 : 1)).map((m, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
                           {m.done ? (
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a9e6b" strokeWidth="2.5">
@@ -276,67 +261,36 @@ export default function SolutionsGrid() {
                     </div>
                   </div>
                 )}
+                {milestones.length === 0 && <div style={{ flexGrow: 1 }} />}
 
                 {/* Footer */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                     Last update &nbsp; {formatDate(dateStr)}
                   </span>
-                  <a href={`/solutions/${s.slug}`} style={{
-                    fontSize: '13px', fontWeight: 600, color: 'var(--accent)',
-                    display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
-                  }}>
-                    View Details →
-                  </a>
+                  {isComingSoon ? (
+                    <span style={{
+                      fontSize: '11px', fontWeight: 600, color: 'var(--accent)',
+                      background: 'var(--accent-dim)', padding: '4px 10px',
+                      borderRadius: '100px', textTransform: 'uppercase',
+                      letterSpacing: '0.04em'
+                    }}>
+                      Coming Soon
+                    </span>
+                  ) : (
+                    <a href={`/solutions/${s.slug}`} style={{
+                      fontSize: '13px', fontWeight: 600, color: 'var(--accent)',
+                      display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
+                    }}>
+                      View Details →
+                    </a>
+                  )}
                 </div>
 
               </div>
             );
           })}
-        </div>
-      ) : null}
 
-      {/* Coming Soon Cards */}
-      {showComingSoon && comingSoon.length > 0 && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '16px',
-          marginTop: showMainCards && filtered.length > 0 ? '16px' : '0',
-        }}>
-          {comingSoon.map((item, i) => (
-            <div key={i} style={{
-              background: 'var(--bg-card)',
-              border: '1px dashed var(--border-light)',
-              borderRadius: '16px',
-              padding: '1.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: '160px',
-              gap: '12px',
-              opacity: 0.75,
-            }}>
-              <h3 style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '20px',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                textAlign: 'center',
-              }}>{item}</h3>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                color: 'var(--accent)',
-                background: 'var(--accent-dim)',
-                padding: '4px 12px',
-                borderRadius: '100px',
-              }}>Coming Soon</span>
-            </div>
-          ))}
         </div>
       )}
 

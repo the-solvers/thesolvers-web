@@ -27,7 +27,7 @@ export default function CreateComingSoonPage() {
 
   const handleAdd = async () => {
     if (!name.trim()) {
-      setMessage('Brand name required hai.');
+      setMessage('Brand name is required.');
       setMsgType('error');
       return;
     }
@@ -47,6 +47,13 @@ export default function CreateComingSoonPage() {
 
   const handleDelete = async (id: number) => {
     await supabase.from('coming_soon').delete().eq('id', id);
+    fetchItems();
+  };
+
+  const handleEdit = async (id: number, oldName: string) => {
+    const newName = window.prompt(`Edit name for "${oldName}":`, oldName);
+    if (!newName || newName.trim() === '' || newName === oldName) return;
+    await supabase.from('coming_soon').update({ name: newName.trim() }).eq('id', id);
     fetchItems();
   };
 
@@ -90,7 +97,7 @@ export default function CreateComingSoonPage() {
           Add Coming Soon
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
-          Brand ka naam daalo — homepage pe "Coming Soon" card ban jaayega.
+          Enter a brand name — it will be displayed as a "Coming Soon" card on the homepage.
         </p>
 
         {/* Input + Button */}
@@ -175,19 +182,34 @@ export default function CreateComingSoonPage() {
                       Coming Soon
                     </span>
                   </div>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    style={{
-                      background: 'none', border: 'none',
-                      color: 'var(--text-muted)', cursor: 'pointer',
-                      fontSize: '18px', padding: '0 4px',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                  >
-                    ×
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      onClick={() => handleEdit(item.id, item.name)}
+                      style={{
+                        background: 'none', border: 'none',
+                        color: 'var(--text-muted)', cursor: 'pointer',
+                        fontSize: '13px', fontWeight: 600, padding: '4px 8px',
+                        transition: 'color 0.2s', fontFamily: 'var(--font-body)',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      style={{
+                        background: 'none', border: 'none',
+                        color: 'var(--text-muted)', cursor: 'pointer',
+                        fontSize: '13px', fontWeight: 600, padding: '4px 8px',
+                        transition: 'color 0.2s', fontFamily: 'var(--font-body)',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
