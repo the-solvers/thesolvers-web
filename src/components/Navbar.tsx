@@ -47,9 +47,9 @@ export default function Navbar() {
       }}>
 
         {/* Logo */}
-        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '2px', zIndex: 101 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>The</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--accent)', letterSpacing: '-0.5px' }}>Solvers</span>
+        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1px', zIndex: 101 }}>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '19px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.8px' }}>The</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '19px', fontWeight: 800, color: 'var(--accent)', letterSpacing: '-0.8px' }}>Solvers</span>
         </a>
 
         {/* Desktop Nav Links */}
