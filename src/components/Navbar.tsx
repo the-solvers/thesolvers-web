@@ -1,10 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [dark, setDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -52,30 +54,36 @@ export default function Navbar() {
 
         {/* Desktop Nav Links */}
         <div className="nav-links-desktop" style={{ display: 'flex', alignItems: 'center', gap: '0.1rem' }}>
-          {['Home', 'About', 'Blog', 'Contact'].map(item => (
-            <a
-              key={item}
-              href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-              style={{
-                fontSize: '14px', fontWeight: 500,
-                color: 'var(--text-secondary)',
-                padding: '7px 16px', borderRadius: '8px',
-                transition: 'all 0.18s ease',
-                letterSpacing: '0.01em',
-                fontFamily: 'var(--font-body)',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.color = 'var(--text-primary)';
-                e.currentTarget.style.background = 'var(--bg-hover)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.color = 'var(--text-secondary)';
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              {item}
-            </a>
-          ))}
+          {['Home', 'About', 'Blog', 'Contact'].map(item => {
+            const href = item === 'Home' ? '/' : `/${item.toLowerCase()}`;
+            const isActive = item === 'Home' ? pathname === '/' : pathname.startsWith(`/${item.toLowerCase()}`);
+            return (
+              <a
+                key={item}
+                href={href}
+                style={{
+                  fontSize: '14px',
+                  fontWeight: isActive ? 600 : 500,
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  background: isActive ? 'var(--bg-hover)' : 'transparent',
+                  padding: '7px 16px', borderRadius: '8px',
+                  transition: 'all 0.18s ease',
+                  letterSpacing: '0.01em',
+                  fontFamily: 'var(--font-body)',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.background = 'var(--bg-hover)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = isActive ? 'var(--text-primary)' : 'var(--text-secondary)';
+                  e.currentTarget.style.background = isActive ? 'var(--bg-hover)' : 'transparent';
+                }}
+              >
+                {item}
+              </a>
+            );
+          })}
         </div>
 
         {/* Right side */}

@@ -11,22 +11,18 @@ export default function Hero() {
   const [weeksIn, setWeeksIn] = useState<number>(0);
 
   useEffect(() => {
-    // Weeks since project start
-    const startDate = new Date('2026-01-01');
-    const now = new Date();
-    const weeks = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
-    setWeeksIn(weeks);
-
-    // Fetch from Supabase
+    // Fetch all stats from Supabase
     const load = async () => {
       const { data: sols } = await supabase
         .from('solutions')
-        .select('users, status');
+        .select('users, status, week_number');
       if (sols) {
         const live = sols.filter(s => s.status === 'live' || s.status === 'on-track').length;
         const sum = sols.reduce((acc, s) => acc + (s.users || 0), 0);
+        const maxWeek = sols.reduce((max, s) => Math.max(max, s.week_number || 0), 0);
         setLaunched(live);
         setTotalUsers(sum);
+        setWeeksIn(maxWeek);
       }
     };
     load();
@@ -59,9 +55,9 @@ export default function Hero() {
   }, [totalUsers]);
 
   const stats = [
-    { label: 'Live Now',     value: launched !== null ? `${launched}` : '—', suffix: '/100' },
-    { label: 'Users Helped', value: animatedUsers.toLocaleString(),              suffix: '+'    },
-    { label: 'Weeks In',     value: `${weeksIn}`,                                suffix: '/100' },
+    { label: 'Live Now',       value: launched !== null ? `${launched}` : '—', suffix: '/100' },
+    { label: 'Users Reached',  value: animatedUsers.toLocaleString(),              suffix: ''     },
+    { label: 'Weeks In',       value: weeksIn > 0 ? `${weeksIn}` : '—',          suffix: '/100' },
   ];
 
   return (
