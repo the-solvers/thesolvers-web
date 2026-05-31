@@ -1,7 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import SolutionsGrid from '@/components/SolutionsGrid';
-import QuickStats from '@/components/QuickStats';
 import Newsletter from '@/components/Newsletter';
 import Footer from '@/components/Footer';
 
@@ -12,7 +11,6 @@ export default function Home() {
       <main>
         <Hero />
         <SolutionsGrid />
-        <QuickStats />
         <Newsletter />
       </main>
       <Footer />

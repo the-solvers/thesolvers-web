@@ -42,7 +42,7 @@ export default function BlogPage() {
       <main style={{ minHeight: '100vh', paddingTop: '64px' }}>
 
         {/* ── Header ── */}
-        <section style={{ padding: '60px 4rem 56px', borderBottom: '1px solid var(--border)' }}>
+        <section style={{ padding: '60px 2rem 56px', borderBottom: '1px solid var(--border)', maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '2rem' }}>
             <div>
               <p style={{
@@ -79,7 +79,7 @@ export default function BlogPage() {
         </section>
 
         {/* ── Posts ── */}
-        <section style={{ padding: '0 4rem 100px' }}>
+        <section style={{ padding: '0 2rem 100px', maxWidth: '1100px', margin: '0 auto' }}>
           {loading ? (
             <div style={{ padding: '5rem 0', color: 'var(--text-muted)', fontSize: '15px' }}>Loading posts…</div>
           ) : posts.length === 0 ? (

@@ -1,26 +1,35 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase';
 
 export default function Hero() {
-  const [count, setCount] = useState(0);
   const [dark, setDark] = useState(false);
+  const [launched, setLaunched] = useState<number | null>(null);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [animatedUsers, setAnimatedUsers] = useState(0);
+  const [weeksIn, setWeeksIn] = useState<number>(0);
 
   useEffect(() => {
-    // Counter animation
-    const target = 100;
-    const duration = 2000;
-    const step = target / (duration / 16);
-    let current = 0;
-    const timer = setInterval(() => {
-      current += step;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
+    // Weeks since project start
+    const startDate = new Date('2026-01-01');
+    const now = new Date();
+    const weeks = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+    setWeeksIn(weeks);
+
+    // Fetch from Supabase
+    const load = async () => {
+      const { data: sols } = await supabase
+        .from('solutions')
+        .select('users, status');
+      if (sols) {
+        const live = sols.filter(s => s.status === 'live' || s.status === 'on-track').length;
+        const sum = sols.reduce((acc, s) => acc + (s.users || 0), 0);
+        setLaunched(live);
+        setTotalUsers(sum);
       }
-    }, 16);
+    };
+    load();
 
     // Dark mode observer
     const checkDark = () => setDark(document.documentElement.classList.contains('dark'));
@@ -28,17 +37,31 @@ export default function Hero() {
     const observer = new MutationObserver(checkDark);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
-    return () => {
-      clearInterval(timer);
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, []);
 
+  // Animate users counter when totalUsers loads
+  useEffect(() => {
+    if (totalUsers === 0) return;
+    const duration = 2000;
+    const step = totalUsers / (duration / 16);
+    let current = 0;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= totalUsers) {
+        setAnimatedUsers(totalUsers);
+        clearInterval(timer);
+      } else {
+        setAnimatedUsers(Math.floor(current));
+      }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [totalUsers]);
+
   const stats = [
-    { label: 'Total Solutions', value: '100', suffix: '' },
-    { label: 'Live Now',        value: '2',   suffix: '' },
-    { label: 'Users Helped',    value: count.toLocaleString(), suffix: '+' },
-    { label: 'Weeks In',        value: '8',   suffix: '/100' },
+    { label: 'Live Now',     value: launched !== null ? `${launched}` : '—', suffix: '/100' },
+    { label: 'Users Helped', value: animatedUsers.toLocaleString(),              suffix: '+'    },
+    { label: 'Weeks In',     value: `${weeksIn}`,                                suffix: '/100' },
   ];
 
   return (
@@ -136,7 +159,7 @@ export default function Hero() {
           {/* Live stats */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '1px',
             border: '1px solid var(--border)',
             borderRadius: '12px',

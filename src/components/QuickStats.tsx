@@ -2,19 +2,18 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
-type StatCard = {
-  icon: React.ReactNode;
-  value: React.ReactNode;
-  label: string;
-};
-
 export default function QuickStats() {
   const [totalUsers, setTotalUsers] = useState<number | null>(null);
   const [launched,   setLaunched]   = useState<number | null>(null);
-  const [total,      setTotal]      = useState<number | null>(null);
-  const [comingSoon, setComingSoon] = useState<number | null>(null);
+  const [weeksIn,    setWeeksIn]    = useState<number>(0);
 
   useEffect(() => {
+    // Weeks since project start (adjust date as needed)
+    const startDate = new Date('2026-01-01');
+    const now = new Date();
+    const weeks = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+    setWeeksIn(weeks);
+
     const load = async () => {
       const { data: sols } = await supabase
         .from('solutions')
@@ -25,13 +24,7 @@ export default function QuickStats() {
         const live = sols.filter(s => s.status === 'live' || s.status === 'on-track').length;
         setTotalUsers(sum);
         setLaunched(live);
-        setTotal(sols.length);
       }
-
-      const { count } = await supabase
-        .from('coming_soon')
-        .select('*', { count: 'exact', head: true });
-      setComingSoon(count ?? 0);
     };
     load();
   }, []);
@@ -39,16 +32,7 @@ export default function QuickStats() {
   const fmt = (n: number | null) =>
     n === null ? '—' : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n.toLocaleString();
 
-  const stats: StatCard[] = [
-    {
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
-          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-        </svg>
-      ),
-      value: fmt(totalUsers),
-      label: 'Total Users',
-    },
+  const stats = [
     {
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
@@ -61,16 +45,22 @@ export default function QuickStats() {
           <span style={{ fontSize: '18px', color: 'var(--accent)', fontWeight: 500 }}>/100</span>
         </span>
       ),
-      label: 'Solutions Launched',
+      label: 'Live Now',
     },
     {
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
       ),
-      value: total === null ? '—' : `${total}`,
-      label: 'Products Built',
+      value: (
+        <span>
+          {fmt(totalUsers)}
+          <span style={{ fontSize: '18px', color: 'var(--accent)', fontWeight: 500 }}>+</span>
+        </span>
+      ),
+      label: 'Users Helped',
     },
     {
       icon: (
@@ -79,8 +69,13 @@ export default function QuickStats() {
           <polyline points="12 6 12 12 16 14"/>
         </svg>
       ),
-      value: comingSoon === null ? '—' : `${comingSoon}`,
-      label: 'Coming Soon',
+      value: (
+        <span>
+          {weeksIn}
+          <span style={{ fontSize: '18px', color: 'var(--accent)', fontWeight: 500 }}>/100</span>
+        </span>
+      ),
+      label: 'Weeks In',
     },
   ];
 

@@ -282,14 +282,12 @@ export default function SolutionsGrid() {
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                     Last update &nbsp; {formatDate(dateStr)}
                   </span>
-                  {s.url && (
-                    <a href={s.url} target="_blank" rel="noopener noreferrer" style={{
-                      fontSize: '13px', fontWeight: 600, color: 'var(--accent)',
-                      display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
-                    }}>
-                      View Details →
-                    </a>
-                  )}
+                  <a href={`/solutions/${s.slug}`} style={{
+                    fontSize: '13px', fontWeight: 600, color: 'var(--accent)',
+                    display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
+                  }}>
+                    View Details →
+                  </a>
                 </div>
 
               </div>

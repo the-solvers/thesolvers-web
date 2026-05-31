@@ -9,10 +9,16 @@ export default function Navbar() {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
 
-    // Always default to light mode — remove any saved dark theme
-    document.documentElement.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
-    setDark(false);
+    // Default light, but respect user's saved preference
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+      document.documentElement.classList.add('dark');
+      setDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setDark(false);
+    }
 
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
