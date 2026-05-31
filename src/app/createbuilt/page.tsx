@@ -40,27 +40,28 @@ export default function CreateBuiltPage() {
   // ── Styles ────────────────────────────────────────────────────
   const inp: React.CSSProperties = {
     width: '100%', padding: '11px 13px', boxSizing: 'border-box',
-    background: '#1a1a1a', border: '1px solid #2e2e2e',
-    borderRadius: '8px', color: '#e8e6e1', fontSize: '14px',
+    background: 'var(--bg-card)', border: '1px solid var(--border-light)',
+    borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px',
     fontFamily: 'inherit', outline: 'none', transition: 'border 0.2s',
   };
   const sel: React.CSSProperties = {
     ...inp, appearance: 'none', WebkitAppearance: 'none',
-    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(128,128,128,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+
     backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
     backgroundSize: '14px', paddingRight: '36px', cursor: 'pointer',
   };
   const onF = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    e.currentTarget.style.borderColor = '#a855f7';
+    e.currentTarget.style.borderColor = 'var(--accent)';
   };
   const onB = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    e.currentTarget.style.borderColor = '#2e2e2e';
+    e.currentTarget.style.borderColor = 'var(--border-light)';
   };
 
   const F = (label: string, hint: string, el: React.ReactNode) => (
     <div style={{ marginBottom: '1.25rem' }}>
-      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#e8e6e1', marginBottom: '3px', letterSpacing: '0.02em' }}>{label}</label>
-      <p style={{ fontSize: '11px', color: '#6b6b6b', marginBottom: '6px', margin: '0 0 6px' }}>{hint}</p>
+      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px', letterSpacing: '0.02em' }}>{label}</label>
+      <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', margin: '0 0 6px' }}>{hint}</p>
       {el}
     </div>
   );
@@ -136,29 +137,29 @@ export default function CreateBuiltPage() {
 
   const sectionHead = (n: string, t: string) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.25rem' }}>
-      <span style={{ fontSize: '11px', fontWeight: 700, color: '#a855f7', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{n}</span>
-      <div style={{ flex: 1, height: '1px', background: '#2a2a2a' }} />
-      <span style={{ fontSize: '11px', color: '#444' }}>{t}</span>
+      <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{n}</span>
+      <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t}</span>
     </div>
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111', fontFamily: "'Inter', system-ui, sans-serif", color: '#e8e6e1' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', fontFamily: 'var(--font-body)', color: 'var(--text-primary)' }}>
 
       {/* Top Bar */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(17,17,17,0.95)', backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid #222',
+        background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid var(--border)',
         padding: '0 2rem', height: '56px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <a href="/" style={{ fontSize: '13px', color: '#555', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <a href="/" style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
             ← Back
           </a>
-          <span style={{ color: '#2e2e2e' }}>|</span>
-          <span style={{ fontSize: '14px', fontWeight: 600, color: '#e8e6e1' }}>
+          <span style={{ color: 'var(--border)' }}>|</span>
+          <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
             Add New Built
           </span>
         </div>
@@ -173,7 +174,7 @@ export default function CreateBuiltPage() {
             disabled={saving}
             style={{
               padding: '8px 20px', fontSize: '13px', fontWeight: 600,
-              background: saving ? '#2a2a2a' : 'linear-gradient(135deg, #a855f7, #7c3aed)',
+              background: saving ? 'var(--border)' : 'var(--accent)',
               border: 'none', borderRadius: '8px',
               cursor: saving ? 'not-allowed' : 'pointer',
               color: 'white', transition: 'opacity 0.2s',
@@ -189,13 +190,13 @@ export default function CreateBuiltPage() {
 
         {/* ── LEFT: Form ── */}
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#e8e6e1', marginBottom: '0.4rem' }}>Solution Editor</h1>
-          <p style={{ fontSize: '13px', color: '#555', marginBottom: '2rem', lineHeight: 1.6 }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Solution Editor</h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '2rem', lineHeight: 1.6 }}>
             Fill in all the card details — the preview on the right will update live.
           </p>
 
           {/* Section 1 — Basic Info */}
-          <div style={{ background: '#161616', border: '1px solid #222', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
             {sectionHead('01', 'Basic Info')}
             {F('Product Name *', 'e.g. VoiceDouble, FocusBlock',
               <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="VoiceDouble" style={inp} onFocus={onF} onBlur={onB} />
@@ -207,14 +208,14 @@ export default function CreateBuiltPage() {
               <div>
                 {F('Category', 'Select a category',
                   <select value={category} onChange={e => setCategory(e.target.value)} style={sel} onFocus={onF} onBlur={onB}>
-                    {CATEGORIES.map(c => <option key={c} value={c} style={{ background: '#1a1a1a' }}>{c}</option>)}
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 )}
               </div>
               <div>
                 {F('Status', 'Current status',
                   <select value={status} onChange={e => setStatus(e.target.value)} style={sel} onFocus={onF} onBlur={onB}>
-                    {STATUSES.map(s => <option key={s} value={s} style={{ background: '#1a1a1a' }}>{s}</option>)}
+                    {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 )}
               </div>
@@ -222,7 +223,7 @@ export default function CreateBuiltPage() {
           </div>
 
           {/* Section 2 — Progress & Stats */}
-          <div style={{ background: '#161616', border: '1px solid #222', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
             {sectionHead('02', 'Progress & Stats')}
             {F('Progress %', 'How much is complete? (0–100)',
               <input type="number" min="0" max="100" value={progress} onChange={e => setProgress(e.target.value)} placeholder="75" style={inp} onFocus={onF} onBlur={onB} />
@@ -254,11 +255,11 @@ export default function CreateBuiltPage() {
           </div>
 
           {/* Section 3 — Milestones */}
-          <div style={{ background: '#161616', border: '1px solid #222', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
             {sectionHead('03', 'Milestones')}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
               {milestones.map((m, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: '#1a1a1a', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
                   <button
                     onClick={() => toggleMilestone(i)}
                     style={{
@@ -271,7 +272,7 @@ export default function CreateBuiltPage() {
                     {m.done && <span style={{ color: 'white', fontSize: '11px' }}>✓</span>}
                     {!m.done && <span style={{ color: '#f59e0b', fontSize: '10px' }}>◷</span>}
                   </button>
-                  <span style={{ flex: 1, fontSize: '14px', color: m.done ? '#6b6b6b' : '#e8e6e1', textDecoration: m.done ? 'line-through' : 'none' }}>
+                  <span style={{ flex: 1, fontSize: '14px', color: m.done ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: m.done ? 'line-through' : 'none' }}>
                     {m.label}
                   </span>
                   <button onClick={() => removeMilestone(i)} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: '16px', padding: '0 4px' }}>×</button>
@@ -285,12 +286,12 @@ export default function CreateBuiltPage() {
                 placeholder="Type a new milestone and press Enter…"
                 style={{ ...inp, flex: 1 }} onFocus={onF} onBlur={onB}
               />
-              <button onClick={addMilestone} style={{ padding: '0 16px', background: '#a855f7', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>+</button>
+              <button onClick={addMilestone} style={{ padding: '0 16px', background: 'var(--accent)', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>+</button>
             </div>
           </div>
 
           {/* Section 4 — Problem & Description */}
-          <div style={{ background: '#161616', border: '1px solid #222', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
             {sectionHead('04', 'Problem & Solution')}
             {F('What Was the Problem?', 'The real problem you observed',
               <textarea value={problem} onChange={e => setProblem(e.target.value)} rows={3}
@@ -307,7 +308,7 @@ export default function CreateBuiltPage() {
           </div>
 
           {/* Section 5 — Tech & Links */}
-          <div style={{ background: '#161616', border: '1px solid #222', borderRadius: '12px', padding: '1.5rem' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem' }}>
             {sectionHead('05', 'Tech & Links')}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
@@ -331,19 +332,19 @@ export default function CreateBuiltPage() {
 
         {/* ── RIGHT: Live Card Preview ── */}
         <div style={{ position: 'sticky', top: '76px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 600, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
             Live Preview
           </p>
 
           <div style={{
-            background: '#1a1a1a', border: '1px solid #2a2a2a',
+            background: 'var(--bg-card)', border: '1px solid var(--border-light)',
             borderRadius: '16px', padding: '1.4rem',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           }}>
             {/* Card Header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '15px', fontWeight: 700, color: '#e8e6e1' }}>
+                <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {name || 'Product Name'}
                 </span>
                 {url && <span style={{ fontSize: '13px', color: '#555' }}>↗</span>}
@@ -357,17 +358,17 @@ export default function CreateBuiltPage() {
             </div>
 
             {/* Tagline */}
-            <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: 1.6, marginBottom: '1.2rem' }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1.2rem' }}>
               {tagline || 'Your tagline will appear here…'}
             </p>
 
             {/* Progress */}
             <div style={{ marginBottom: '1.2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', color: '#9ca3af' }}>Progress</span>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#e8e6e1' }}>{prog}%</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Progress</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>{prog}%</span>
               </div>
-              <div style={{ height: '5px', background: '#2a2a2a', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ height: '5px', background: 'var(--border)', borderRadius: '999px', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', width: `${prog}%`,
                   background: 'linear-gradient(90deg, #a855f7, #ec4899)',
@@ -378,22 +379,22 @@ export default function CreateBuiltPage() {
 
             {/* Stats: Users + Valuation */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1.2rem' }}>
-              <div style={{ background: '#222', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ background: 'var(--bg)', borderRadius: '10px', padding: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <span style={{ fontSize: '13px' }}>👥</span>
-                  <span style={{ fontSize: '11px', color: '#9ca3af' }}>Users</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Users</span>
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 700, color: '#e8e6e1', marginBottom: '4px' }}>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
                   {parseInt(users) || 0}
                 </div>
                 <div style={{ fontSize: '11px', color: '#22c55e' }}>↗ +0% this month</div>
               </div>
-              <div style={{ background: '#222', borderRadius: '10px', padding: '12px' }}>
-                <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '6px' }}>Valuation</div>
-                <div style={{ fontSize: '20px', fontWeight: 700, color: '#e8e6e1', marginBottom: '4px' }}>
+              <div style={{ background: 'var(--bg)', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px' }}>Valuation</div>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
                   ${parseFloat(valuation || '0').toFixed(1)}M
                 </div>
-                <div style={{ fontSize: '11px', color: '#6b6b6b' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                   {valuationSince ? `Since ${valuationSince}` : 'Since —'}
                 </div>
               </div>
@@ -402,7 +403,7 @@ export default function CreateBuiltPage() {
             {/* Milestones */}
             {milestones.length > 0 && (
               <div style={{ marginBottom: '1.2rem' }}>
-                <p style={{ fontSize: '12px', fontWeight: 700, color: '#e8e6e1', marginBottom: '10px' }}>Milestones</p>
+                <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '10px' }}>Milestones</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {milestones.map((m, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -411,7 +412,7 @@ export default function CreateBuiltPage() {
                         : <span style={{ fontSize: '14px', color: '#f59e0b' }}>⏳</span>}
                       <span style={{
                         fontSize: '13px',
-                        color: m.done ? '#6b6b6b' : '#e8e6e1',
+                        color: m.done ? 'var(--text-muted)' : 'var(--text-primary)',
                         textDecoration: m.done ? 'line-through' : 'none',
                       }}>{m.label}</span>
                     </div>
@@ -421,19 +422,19 @@ export default function CreateBuiltPage() {
             )}
 
             {/* Divider */}
-            <div style={{ height: '1px', background: '#2a2a2a', margin: '12px 0' }} />
+            <div style={{ height: '1px', background: 'var(--border)', margin: '12px 0' }} />
 
             {/* Last Update + View Details */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <span style={{ fontSize: '12px', color: '#555' }}>Last update</span>
-              <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Last update</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                 {lastUpdate
                   ? new Date(lastUpdate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                   : '—'}
               </span>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#a855f7', cursor: 'pointer' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent)', cursor: 'pointer' }}>
                 View Details →
               </span>
             </div>
