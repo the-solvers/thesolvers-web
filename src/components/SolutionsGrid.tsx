@@ -17,6 +17,7 @@ type Solution = {
   milestones: Milestone[];
   url?: string;
   updated_at: string;
+  last_update: string;
 };
 
 const statusColor: Record<string, { bg: string; color: string }> = {
@@ -24,14 +25,33 @@ const statusColor: Record<string, { bg: string; color: string }> = {
   live:       { bg: 'rgba(74,158,107,0.15)', color: '#4a9e6b' },
   building:   { bg: 'rgba(184,120,42,0.15)', color: '#b8782a' },
   planned:    { bg: 'rgba(138,136,128,0.15)', color: '#8a8880' },
+  paused:     { bg: 'rgba(201,74,74,0.15)',   color: '#c94a4a' },
+};
+
+const selectStyle: React.CSSProperties = {
+  padding: '8px 32px 8px 12px',
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border-light)',
+  borderRadius: '8px',
+  color: 'var(--text-primary)',
+  fontSize: '13px',
+  fontFamily: 'var(--font-body)',
+  cursor: 'pointer',
+  outline: 'none',
+  appearance: 'none',
+  backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(128,128,128,0.8)' stroke-width='2'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'right 10px center',
 };
 
 export default function SolutionsGrid() {
-  const [solutions, setSolutions] = useState<Solution[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [comingSoon, setComingSoon] = useState<string[]>([]);
-  const [yearFilter, setYearFilter] = useState('All Years');
-  const [sortBy, setSortBy] = useState('Progress');
+  const [solutions, setSolutions]     = useState<Solution[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [comingSoon, setComingSoon]   = useState<string[]>([]);
+
+  // Filters
+  const [yearFilter,   setYearFilter]   = useState('All Years');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,8 +73,34 @@ export default function SolutionsGrid() {
     fetchComingSoon();
   }, []);
 
+  // helper: pick the best date field
+  const getYear = (s: Solution) => {
+    const raw = s.last_update || s.updated_at;
+    if (!raw) return null;
+    return new Date(raw).getFullYear();
+  };
+
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Apply filters
+  const filtered = solutions.filter(s => {
+    // Year filter
+    if (yearFilter !== 'All Years') {
+      const yr = getYear(s);
+      if (yr?.toString() !== yearFilter) return false;
+    }
+    // Status filter
+    if (statusFilter !== 'All' && statusFilter !== 'Coming Soon') {
+      if (s.status.toLowerCase() !== statusFilter.toLowerCase()) return false;
+    }
+    return true;
+  });
+
+  // Show coming soon section only when "All" or "Coming Soon" selected
+  const showComingSoon = statusFilter === 'All' || statusFilter === 'Coming Soon';
+  // When "Coming Soon" selected, hide main cards
+  const showMainCards = statusFilter !== 'Coming Soon';
 
   return (
     <section id="solutions" style={{ padding: '0 2rem 100px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -75,89 +121,47 @@ export default function SolutionsGrid() {
           </h2>
         </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Year Filter */}
-          <select
-            value={yearFilter}
-            onChange={e => setYearFilter(e.target.value)}
-            style={{
-              padding: '8px 32px 8px 12px',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-light)',
-              borderRadius: '8px',
-              color: 'var(--text-primary)',
-              fontSize: '13px',
-              fontFamily: 'var(--font-body)',
-              cursor: 'pointer',
-              outline: 'none',
-              appearance: 'none',
-              backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(128,128,128,0.8)' stroke-width='2'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 10px center',
-            }}
-          >
+        {/* Filters row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+
+          {/* Year */}
+          <select value={yearFilter} onChange={e => setYearFilter(e.target.value)} style={selectStyle}>
             <option>All Years</option>
             <option>2025</option>
             <option>2026</option>
           </select>
 
-          {/* Sort Filter */}
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            style={{
-              padding: '8px 32px 8px 12px',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-light)',
-              borderRadius: '8px',
-              color: 'var(--text-primary)',
-              fontSize: '13px',
-              fontFamily: 'var(--font-body)',
-              cursor: 'pointer',
-              outline: 'none',
-              appearance: 'none',
-              backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(128,128,128,0.8)' stroke-width='2'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 10px center',
-            }}
-          >
-            <option>Progress</option>
-            <option>Users</option>
-            <option>Newest</option>
-            <option>Oldest</option>
+          {/* Status */}
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={selectStyle}>
+            <option value="All">All Status</option>
+            <option value="live">Live</option>
+            <option value="building">Building</option>
+            <option value="planned">Planned</option>
+            <option value="on-track">On Track</option>
+            <option value="paused">Paused</option>
+            <option value="Coming Soon">Coming Soon</option>
           </select>
+
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Main Cards Grid */}
       {loading ? (
         <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading…</p>
-      ) : solutions.length === 0 ? (
+      ) : showMainCards && filtered.length === 0 ? (
         <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-          No solutions added yet. Go to /createbuilt to add the first one!
+          No solutions match this filter.
         </p>
-      ) : (
+      ) : showMainCards ? (
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: '16px',
         }}>
-          {solutions
-            .filter(s => {
-              if (yearFilter === 'All Years') return true;
-              return new Date(s.updated_at).getFullYear().toString() === yearFilter;
-            })
-            .sort((a, b) => {
-              if (sortBy === 'Progress') return (b.progress ?? 0) - (a.progress ?? 0);
-              if (sortBy === 'Users') return (b.users ?? 0) - (a.users ?? 0);
-              if (sortBy === 'Newest') return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-              if (sortBy === 'Oldest') return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
-              return 0;
-            })
-          .map(s => {
+          {filtered.map(s => {
             const st = statusColor[s.status] || statusColor['planned'];
             const milestones: Milestone[] = Array.isArray(s.milestones) ? s.milestones : [];
+            const dateStr = s.last_update || s.updated_at || new Date().toISOString();
             return (
               <div key={s.id} style={{
                 background: 'var(--bg-card)',
@@ -202,7 +206,7 @@ export default function SolutionsGrid() {
                   }}>{s.status}</span>
                 </div>
 
-                {/* Progress */}
+                {/* Progress bar */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
                     <span>Progress</span>
@@ -219,7 +223,7 @@ export default function SolutionsGrid() {
                   </div>
                 </div>
 
-                {/* Stats grid */}
+                {/* Stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
@@ -241,7 +245,9 @@ export default function SolutionsGrid() {
                     <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '4px' }}>
                       {s.valuation || '$0.0M'}
                     </div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Since {formatDate(s.updated_at || new Date().toISOString()).split(',')[1]?.trim() || 'Now'}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      {formatDate(dateStr).split(',').slice(0, 2).join(',')}
+                    </div>
                   </div>
                 </div>
 
@@ -264,7 +270,6 @@ export default function SolutionsGrid() {
                           <span style={{
                             color: m.done ? 'var(--text-secondary)' : 'var(--text-primary)',
                             textDecoration: m.done ? 'line-through' : 'none',
-                            fontSize: '13px',
                           }}>{m.title || m.label}</span>
                         </div>
                       ))}
@@ -275,7 +280,7 @@ export default function SolutionsGrid() {
                 {/* Footer */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                    Last update &nbsp; {formatDate(s.updated_at || new Date().toISOString())}
+                    Last update &nbsp; {formatDate(dateStr)}
                   </span>
                   {s.url && (
                     <a href={s.url} target="_blank" rel="noopener noreferrer" style={{
@@ -291,49 +296,51 @@ export default function SolutionsGrid() {
             );
           })}
         </div>
-      )}
+      ) : null}
 
       {/* Coming Soon Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: '16px',
-        marginTop: '16px',
-      }}>
-        {comingSoon.map((item, i) => (
-          <div key={i} style={{
-            background: 'var(--bg-card)',
-            border: '1px dashed var(--border-light)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '160px',
-            gap: '12px',
-            opacity: 0.7,
-          }}>
-            <h3 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '20px',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              textAlign: 'center',
-            }}>{item}</h3>
-            <span style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: 'var(--accent)',
-              background: 'var(--accent-dim)',
-              padding: '4px 12px',
-              borderRadius: '100px',
-            }}>Coming Soon</span>
-          </div>
-        ))}
-      </div>
+      {showComingSoon && comingSoon.length > 0 && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: '16px',
+          marginTop: showMainCards && filtered.length > 0 ? '16px' : '0',
+        }}>
+          {comingSoon.map((item, i) => (
+            <div key={i} style={{
+              background: 'var(--bg-card)',
+              border: '1px dashed var(--border-light)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '160px',
+              gap: '12px',
+              opacity: 0.75,
+            }}>
+              <h3 style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '20px',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                textAlign: 'center',
+              }}>{item}</h3>
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'var(--accent)',
+                background: 'var(--accent-dim)',
+                padding: '4px 12px',
+                borderRadius: '100px',
+              }}>Coming Soon</span>
+            </div>
+          ))}
+        </div>
+      )}
 
     </section>
   );
