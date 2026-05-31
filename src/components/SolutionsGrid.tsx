@@ -29,9 +29,10 @@ const statusColor: Record<string, { bg: string; color: string }> = {
 export default function SolutionsGrid() {
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [comingSoon, setComingSoon] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase
         .from('solutions')
         .select('*')
@@ -39,7 +40,15 @@ export default function SolutionsGrid() {
       setSolutions(data || []);
       setLoading(false);
     };
-    fetch();
+    const fetchComingSoon = async () => {
+      const { data } = await supabase
+        .from('coming_soon')
+        .select('name')
+        .order('created_at', { ascending: true });
+      setComingSoon((data || []).map((d: { name: string }) => d.name));
+    };
+    fetchData();
+    fetchComingSoon();
   }, []);
 
   const formatDate = (d: string) =>
@@ -215,6 +224,49 @@ export default function SolutionsGrid() {
           })}
         </div>
       )}
+
+      {/* Coming Soon Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+        gap: '16px',
+        marginTop: '16px',
+      }}>
+        {comingSoon.map((item, i) => (
+          <div key={i} style={{
+            background: 'var(--bg-card)',
+            border: '1px dashed var(--border-light)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '160px',
+            gap: '12px',
+            opacity: 0.7,
+          }}>
+            <h3 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '20px',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              textAlign: 'center',
+            }}>{item}</h3>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 600,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: 'var(--accent)',
+              background: 'var(--accent-dim)',
+              padding: '4px 12px',
+              borderRadius: '100px',
+            }}>Coming Soon</span>
+          </div>
+        ))}
+      </div>
+
     </section>
   );
 }
