@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
-type Milestone = { title: string; done: boolean };
+type Milestone = { title?: string; label?: string; done: boolean };
 
 type Solution = {
   id: number;
