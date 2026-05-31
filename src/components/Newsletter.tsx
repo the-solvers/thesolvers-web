@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
@@ -8,6 +8,15 @@ export default function Newsletter() {
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const checkDark = () => setDark(document.documentElement.classList.contains('dark'));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubscribe = async () => {
     if (!email) return;
@@ -134,7 +143,7 @@ export default function Newsletter() {
           flexShrink: 0,
         }}>
           <Image
-            src="/newsletter-v2.png"
+            src={dark ? '/newsletter.png' : '/newsletter.png'}
             alt="Newsletter illustration"
             fill
             sizes="320px"

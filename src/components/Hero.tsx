@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 export default function Hero() {
   const [count, setCount] = useState(0);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
     const target = 100;
@@ -15,7 +16,14 @@ export default function Hero() {
       if (current >= target) { setCount(target); clearInterval(timer); }
       else setCount(Math.floor(current));
     }, 16);
-    return () => clearInterval(timer);
+
+    // Detect dark mode
+    const checkDark = () => setDark(document.documentElement.classList.contains('dark'));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => { clearInterval(timer); observer.disconnect(); };
   }, []);
 
   return (
@@ -139,7 +147,7 @@ export default function Hero() {
           justifySelf: 'center',
         }}>
           <Image
-            src="/hero-illustration.png"
+            src={dark ? '/hero-illustration2.png' : '/hero-illustration2.png'}
             alt="Building real solutions illustration"
             fill
             sizes="(max-width: 768px) 100vw, 520px"
