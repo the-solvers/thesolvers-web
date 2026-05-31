@@ -11,7 +11,9 @@ const COOKIE_NAME = 'admin_auth';
 const COOKIE_VERIFIED = 'admin_verified'; // safe boolean cookie, no password stored
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY!;
+const SUPABASE_KEY =
+  process.env.SUPABASE_ANON_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
 /** Fetch the stored password hash from Supabase admin_config table */
 async function getStoredPassword(): Promise<string | null> {
@@ -189,4 +191,3 @@ export const config = {
     '/createadminblogs/:path*',
   ],
 };
-
