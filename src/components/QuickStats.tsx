@@ -4,38 +4,36 @@ import { supabase } from '@/lib/supabase';
 
 type StatCard = {
   icon: React.ReactNode;
-  value: string;
+  value: React.ReactNode;
   label: string;
 };
 
 export default function QuickStats() {
-  const [totalUsers, setTotalUsers]         = useState<number | null>(null);
-  const [launched,   setLaunched]           = useState<number | null>(null);
-  const [total,      setTotal]              = useState<number | null>(null);
-  const [comingSoon, setComingSoon]         = useState<number | null>(null);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const [launched,   setLaunched]   = useState<number | null>(null);
+  const [total,      setTotal]      = useState<number | null>(null);
+  const [comingSoon, setComingSoon] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
-      // total users = sum of users column across all solutions
+    const load = async () => {
       const { data: sols } = await supabase
         .from('solutions')
         .select('users, status');
 
       if (sols) {
-        const sum     = sols.reduce((acc, s) => acc + (s.users || 0), 0);
-        const live    = sols.filter(s => s.status === 'live' || s.status === 'on-track').length;
+        const sum  = sols.reduce((acc, s) => acc + (s.users || 0), 0);
+        const live = sols.filter(s => s.status === 'live' || s.status === 'on-track').length;
         setTotalUsers(sum);
         setLaunched(live);
         setTotal(sols.length);
       }
 
-      // coming soon count
       const { count } = await supabase
         .from('coming_soon')
         .select('*', { count: 'exact', head: true });
       setComingSoon(count ?? 0);
     };
-    fetch();
+    load();
   }, []);
 
   const fmt = (n: number | null) =>
@@ -57,9 +55,12 @@ export default function QuickStats() {
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
       ),
-      value: launched === null || total === null
-        ? '—'
-        : `${launched}/${total + (comingSoon ?? 0)}`,
+      value: launched === null ? '—' : (
+        <span>
+          {launched}
+          <span style={{ fontSize: '18px', color: 'var(--accent)', fontWeight: 500 }}>/100</span>
+        </span>
+      ),
       label: 'Solutions Launched',
     },
     {
