@@ -11,7 +11,7 @@
 ---
 
 <p align="center">
-  <img src="public/hero-illustration.png" alt="TheSolvers Hero" width="600" />
+  <img src="public/hero-illustration2.png" alt="TheSolvers Hero" width="600" />
 </p>
 
 ---
