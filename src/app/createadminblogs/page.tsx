@@ -24,7 +24,7 @@ export default function CreateBlogPage() {
 
   const submit = async (publish: boolean) => {
     if (!title.trim() || !excerpt.trim() || !content.trim()) {
-      setMessage('Title, Short Summary aur Content — teeno required hain.');
+      setMessage('Title, Short Summary, and Content are all required.');
       setMessageType('error');
       return;
     }
@@ -45,14 +45,14 @@ export default function CreateBlogPage() {
 
     setStatus('idle');
     if (error) {
-      setMessage('Kuch galat ho gaya: ' + error.message);
+      setMessage('Something went wrong: ' + error.message);
       setMessageType('error');
     } else if (publish) {
-      setMessage('✓ Blog publish ho gaya! /blog pe ja ke dekho.');
+      setMessage('✓ Blog published successfully! Check it at /blog.');
       setMessageType('success');
       setTitle(''); setSlug(''); setTags(''); setExcerpt(''); setContent(''); setReadTime('');
     } else {
-      setMessage('✓ Draft save ho gaya.');
+      setMessage('✓ Draft saved successfully.');
       setMessageType('success');
     }
   };
@@ -94,11 +94,11 @@ export default function CreateBlogPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <a href="/" style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>
-            ← Site pe Wapas
+            ← Back to Site
           </a>
           <span style={{ color: 'var(--border)', fontSize: '18px' }}>|</span>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>
-            Naya Blog Likho
+            New Blog Post
           </span>
         </div>
 
@@ -118,7 +118,7 @@ export default function CreateBlogPage() {
               color: 'var(--text-secondary)', fontFamily: 'var(--font-body)',
             }}
           >
-            {status === 'saving' ? 'Save ho rha…' : 'Draft Save Karo'}
+            {status === 'saving' ? 'Saving…' : 'Save Draft'}
           </button>
           <button
             onClick={() => submit(true)}
@@ -131,7 +131,7 @@ export default function CreateBlogPage() {
               color: 'white', fontFamily: 'var(--font-body)',
             }}
           >
-            {status === 'publishing' ? 'Publish ho rha…' : 'Publish Karo →'}
+            {status === 'publishing' ? 'Publishing…' : 'Publish →'}
           </button>
         </div>
       </div>
@@ -144,8 +144,8 @@ export default function CreateBlogPage() {
           color: 'var(--text-primary)', marginBottom: '0.5rem',
         }}>Blog Editor</h1>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
-          Neeche form bharo. <strong>Title, Short Summary aur Content</strong> zaroori hain. Baaki optional hain.
-          Likho → "Publish Karo" dabao → /blog pe live ho jaayega.
+          Fill in the form below. <strong>Title, Short Summary, and Content</strong> are required. The rest are optional.
+          Write → click &quot;Publish&quot; → it goes live at /blog.
         </p>
 
         {/* ─── Section 1: Basic Info ─── */}
@@ -158,21 +158,21 @@ export default function CreateBlogPage() {
           </h2>
 
           {field(
-            'Blog ka Title *',
-            'Yeh blog ka main naam hai jo sabse upar dikh​ta hai.',
+            'Blog Title *',
+            'This is the main title displayed at the top of the blog post.',
             <input
               type="text" value={title} onChange={e => onTitleChange(e.target.value)}
-              placeholder='Jaise: "Week 1 mein kya banaya aur kya toota"'
+              placeholder='e.g. "What We Built in Week 1 — and What Broke"'
               style={inputStyle} onFocus={focus} onBlur={blur}
             />
           )}
 
           {field(
-            'URL Slug (auto-fill hota hai)',
-            `Blog ka link yeh hoga: thesolvers.com/blog/${slug || 'aapka-title-yahan'}`,
+            'URL Slug (auto-generated)',
+            `Blog link will be: thesolvers.com/blog/${slug || 'your-title-here'}`,
             <input
               type="text" value={slug} onChange={e => setSlug(e.target.value)}
-              placeholder="url-mein-yahan-aayega"
+              placeholder="your-slug-here"
               style={{ ...inputStyle, fontSize: '13px', color: 'var(--text-secondary)' }}
               onFocus={focus} onBlur={blur}
             />
@@ -180,10 +180,10 @@ export default function CreateBlogPage() {
 
           {field(
             'Short Summary *',
-            'Blog list mein title ke neeche yeh 1-2 line dikh​ti hai. Reader ko pata chale blog kiske baare mein hai.',
+            'This 1-2 line summary appears below the title in the blog list, telling readers what the post is about.',
             <textarea
               value={excerpt} onChange={e => setExcerpt(e.target.value)} rows={3}
-              placeholder="Jaise: Is week humne ek expense tracker banaya. Kya kaam kiya, kya nahi — sab kuch yahan."
+              placeholder="e.g. This week we built an expense tracker. What worked, what didn't — all here."
               style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.65 }}
               onFocus={focus} onBlur={blur}
             />
@@ -202,8 +202,8 @@ export default function CreateBlogPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               {field(
-                'Author ka Naam',
-                'Kisne likha?',
+                'Author Name',
+                'Who wrote this?',
                 <input type="text" value={author} onChange={e => setAuthor(e.target.value)}
                   style={inputStyle} onFocus={focus} onBlur={blur}
                 />
@@ -211,8 +211,8 @@ export default function CreateBlogPage() {
             </div>
             <div>
               {field(
-                'Padhne ka Time',
-                'Jaise: 4 min read',
+                'Reading Time',
+                'e.g. 4 min read',
                 <input type="text" value={readTime} onChange={e => setReadTime(e.target.value)}
                   placeholder="5 min read"
                   style={inputStyle} onFocus={focus} onBlur={blur}
@@ -222,7 +222,7 @@ export default function CreateBlogPage() {
             <div>
               {field(
                 'Tags',
-                'Comma se alag karo',
+                'Separate with commas',
                 <input type="text" value={tags} onChange={e => setTags(e.target.value)}
                   placeholder="lessons, week 1, startup"
                   style={inputStyle} onFocus={focus} onBlur={blur}
@@ -241,11 +241,11 @@ export default function CreateBlogPage() {
             3 — Blog Content *
           </h2>
           {field(
-            'Poora Blog Yahan Likho',
-            'Yeh main body hai — jo bhi share karna hai, yahan likho. Jitna chaaho utna lamba.',
+            'Write Your Full Blog Here',
+            'This is the main body — write everything you want to share. As long as you like.',
             <textarea
               value={content} onChange={e => setContent(e.target.value)} rows={22}
-              placeholder={`Yahan apna blog likho…\n\nJaise:\nIs week humne ek problem dhundi — kai logon ko apne daily expenses track karna mushkil lagta hai...\n\nHumne decide kiya ke ek simple app banaenge jo...\n\nKya kaam kiya:\n- Feature 1\n- Feature 2\n\nKya nahi kaam kiya:\n- ...\n\nAgle week kya karenge:\n...`}
+              placeholder={`Write your blog here…\n\nFor example:\nThis week we found a problem — many people struggle to track their daily expenses...\n\nWe decided to build a simple app that...\n\nWhat worked:\n- Feature 1\n- Feature 2\n\nWhat didn't work:\n- ...\n\nWhat we're doing next week:\n...`}
               style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.8, fontSize: '15px', minHeight: '400px' }}
               onFocus={focus} onBlur={blur}
             />
