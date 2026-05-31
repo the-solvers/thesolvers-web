@@ -30,6 +30,8 @@ export default function SolutionsGrid() {
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
   const [comingSoon, setComingSoon] = useState<string[]>([]);
+  const [yearFilter, setYearFilter] = useState('All Years');
+  const [sortBy, setSortBy] = useState('Progress');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,6 +74,60 @@ export default function SolutionsGrid() {
             What we&apos;ve built so far
           </h2>
         </div>
+
+        {/* Filters */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Year Filter */}
+          <select
+            value={yearFilter}
+            onChange={e => setYearFilter(e.target.value)}
+            style={{
+              padding: '8px 32px 8px 12px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-light)',
+              borderRadius: '8px',
+              color: 'var(--text-primary)',
+              fontSize: '13px',
+              fontFamily: 'var(--font-body)',
+              cursor: 'pointer',
+              outline: 'none',
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(128,128,128,0.8)' stroke-width='2'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 10px center',
+            }}
+          >
+            <option>All Years</option>
+            <option>2025</option>
+            <option>2026</option>
+          </select>
+
+          {/* Sort Filter */}
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            style={{
+              padding: '8px 32px 8px 12px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-light)',
+              borderRadius: '8px',
+              color: 'var(--text-primary)',
+              fontSize: '13px',
+              fontFamily: 'var(--font-body)',
+              cursor: 'pointer',
+              outline: 'none',
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(128,128,128,0.8)' stroke-width='2'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 10px center',
+            }}
+          >
+            <option>Progress</option>
+            <option>Users</option>
+            <option>Newest</option>
+            <option>Oldest</option>
+          </select>
+        </div>
       </div>
 
       {/* Grid */}
@@ -87,7 +143,19 @@ export default function SolutionsGrid() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: '16px',
         }}>
-          {solutions.map(s => {
+          {solutions
+            .filter(s => {
+              if (yearFilter === 'All Years') return true;
+              return new Date(s.updated_at).getFullYear().toString() === yearFilter;
+            })
+            .sort((a, b) => {
+              if (sortBy === 'Progress') return (b.progress ?? 0) - (a.progress ?? 0);
+              if (sortBy === 'Users') return (b.users ?? 0) - (a.users ?? 0);
+              if (sortBy === 'Newest') return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+              if (sortBy === 'Oldest') return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+              return 0;
+            })
+          .map(s => {
             const st = statusColor[s.status] || statusColor['planned'];
             const milestones: Milestone[] = Array.isArray(s.milestones) ? s.milestones : [];
             return (
