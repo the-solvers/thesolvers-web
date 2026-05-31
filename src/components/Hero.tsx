@@ -170,7 +170,7 @@ export default function Hero() {
           justifySelf: 'center',
         }}>
           <Image
-            src={dark ? '/hero-illustration-dark.png' : '/hero-illustration.png'}
+            src="/hero-illustration2.png"
             alt="Building real solutions illustration"
             fill
             sizes="(max-width: 768px) 100vw, 520px"
