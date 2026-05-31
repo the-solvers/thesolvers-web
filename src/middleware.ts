@@ -7,26 +7,36 @@ const PROTECTED_ROUTES = [
   '/createadminblogs',
 ];
 
-const PASSWORD = 'Gate@28';
 const COOKIE_NAME = 'admin_auth';
+const COOKIE_VERIFIED = 'admin_verified'; // safe boolean cookie, no password stored
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY!;
 
-  // Check if route is protected
-  const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
-  if (!isProtected) return NextResponse.next();
-
-  // Check auth cookie
-  const authCookie = request.cookies.get(COOKIE_NAME);
-  if (authCookie?.value === PASSWORD) return NextResponse.next();
-
-  // Handle password form submission (POST)
-  if (request.method === 'POST') {
-    return NextResponse.next();
+/** Fetch the stored password hash from Supabase admin_config table */
+async function getStoredPassword(): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/admin_config?select=value&key=eq.admin_password&limit=1`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        // Edge runtime — no node cache, always fresh
+        cache: 'no-store',
+      }
+    );
+    if (!res.ok) return null;
+    const rows = await res.json() as { value: string }[];
+    return rows?.[0]?.value ?? null;
+  } catch {
+    return null;
   }
+}
 
-  // Show password gate
+function buildLoginPage(pathname: string, error = false): NextResponse {
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -53,92 +63,34 @@ export function middleware(request: NextRequest) {
       max-width: 400px;
       margin: 1rem;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      margin-bottom: 2rem;
-    }
-    .logo-the {
-      font-size: 20px;
-      font-weight: 700;
-      color: #1a1814;
-      letter-spacing: -0.5px;
-      font-family: Georgia, serif;
-    }
-    .logo-solvers {
-      font-size: 20px;
-      font-weight: 700;
-      color: #e8633a;
-      letter-spacing: -0.5px;
-      font-family: Georgia, serif;
-    }
-    h2 {
-      font-family: Georgia, serif;
-      font-size: 22px;
-      font-weight: 600;
-      color: #1a1814;
-      margin-bottom: 6px;
-    }
-    p {
-      font-size: 13px;
-      color: #8a8880;
-      margin-bottom: 1.75rem;
-    }
-    label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #8a8880;
-      margin-bottom: 7px;
-    }
+    .logo { display: flex; align-items: center; gap: 2px; margin-bottom: 2rem; }
+    .logo-the   { font-size: 20px; font-weight: 700; color: #1a1814; letter-spacing: -0.5px; font-family: Georgia, serif; }
+    .logo-solvers { font-size: 20px; font-weight: 700; color: #e8633a; letter-spacing: -0.5px; font-family: Georgia, serif; }
+    h2 { font-family: Georgia, serif; font-size: 22px; font-weight: 600; color: #1a1814; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #8a8880; margin-bottom: 1.75rem; }
+    label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #8a8880; margin-bottom: 7px; }
     input[type="password"] {
-      width: 100%;
-      padding: 12px 14px;
+      width: 100%; padding: 12px 14px;
       background: transparent;
-      border: 1px solid #B8B5AC;
-      border-radius: 10px;
-      font-size: 15px;
-      color: #1a1814;
-      outline: none;
-      margin-bottom: 1rem;
-      font-family: inherit;
+      border: 1px solid ${error ? '#b93a3a' : '#B8B5AC'};
+      border-radius: 10px; font-size: 15px; color: #1a1814;
+      outline: none; margin-bottom: 1rem; font-family: inherit;
       transition: border-color 0.2s;
     }
-    input[type="password"]:focus {
-      border-color: #e8633a;
-    }
+    input[type="password"]:focus { border-color: #e8633a; }
     button {
-      width: 100%;
-      padding: 12px;
-      background: #e8633a;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.2s;
+      width: 100%; padding: 12px;
+      background: #e8633a; color: white; border: none;
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.2s;
     }
     button:hover { background: #d0522a; }
-    .error {
-      font-size: 13px;
-      color: #b93a3a;
-      margin-top: 10px;
-      font-weight: 500;
-      display: none;
-    }
+    .error { font-size: 13px; color: #b93a3a; margin-top: 10px; font-weight: 500; }
     .lock {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       background: rgba(232,99,58,0.12);
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       margin-bottom: 1.25rem;
     }
   </style>
@@ -155,31 +107,14 @@ export function middleware(request: NextRequest) {
       </svg>
     </div>
     <h2>Admin Access</h2>
-    <p>Enter the password to continue.</p>
-    <form id="form">
+    <p class="subtitle">Enter the password to continue.</p>
+    <form method="POST" action="/__admin_auth?redirect=${encodeURIComponent(pathname)}">
       <label>Password</label>
-      <input type="password" id="pwd" placeholder="••••••••" autofocus />
+      <input type="password" name="password" placeholder="••••••••" autofocus />
       <button type="submit">Enter →</button>
-      <p class="error" id="err">Incorrect password. Try again.</p>
+      ${error ? '<p class="error">Incorrect password. Try again.</p>' : ''}
     </form>
   </div>
-  <script>
-    const CORRECT = '${PASSWORD}';
-    const REDIRECT = '${pathname}';
-    document.getElementById('form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const val = document.getElementById('pwd').value;
-      if (val === CORRECT) {
-        document.cookie = 'admin_auth=' + val + '; path=/; max-age=86400; SameSite=Strict';
-        window.location.href = REDIRECT;
-      } else {
-        const err = document.getElementById('err');
-        err.style.display = 'block';
-        document.getElementById('pwd').value = '';
-        document.getElementById('pwd').focus();
-      }
-    });
-  </script>
 </body>
 </html>`;
 
@@ -189,11 +124,69 @@ export function middleware(request: NextRequest) {
   });
 }
 
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // ── Handle the auth POST endpoint ────────────────────────────────────────
+  if (pathname === '/__admin_auth' && request.method === 'POST') {
+    const redirect = request.nextUrl.searchParams.get('redirect') || '/admindashboard';
+
+    // Parse form body
+    const body = await request.text();
+    const params = new URLSearchParams(body);
+    const submitted = params.get('password') ?? '';
+
+    // Fetch stored password from Supabase (server-side only)
+    const stored = await getStoredPassword();
+
+    if (stored && submitted === stored) {
+      // Set a simple verified cookie — no password value stored
+      const response = NextResponse.redirect(new URL(redirect, request.url));
+      response.cookies.set(COOKIE_VERIFIED, 'true', {
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24, // 24 hours
+        path: '/',
+      });
+      return response;
+    }
+
+    // Wrong password — re-render login with error
+    return buildLoginPage(redirect, true);
+  }
+
+  // ── Guard protected routes ────────────────────────────────────────────────
+  const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
+  if (!isProtected) return NextResponse.next();
+
+  // Check verified cookie
+  const verified = request.cookies.get(COOKIE_VERIFIED);
+  if (verified?.value === 'true') return NextResponse.next();
+
+  // Legacy: accept old password cookie during transition
+  const legacy = request.cookies.get(COOKIE_NAME);
+  if (legacy?.value) {
+    const stored = await getStoredPassword();
+    if (stored && legacy.value === stored) {
+      const response = NextResponse.next();
+      response.cookies.set(COOKIE_VERIFIED, 'true', {
+        httpOnly: true, sameSite: 'strict', maxAge: 60 * 60 * 24, path: '/',
+      });
+      return response;
+    }
+  }
+
+  // Show login gate
+  return buildLoginPage(pathname);
+}
+
 export const config = {
   matcher: [
+    '/__admin_auth',
     '/admindashboard/:path*',
     '/createbuilt/:path*',
     '/createcomingsoon/:path*',
     '/createadminblogs/:path*',
   ],
 };
+

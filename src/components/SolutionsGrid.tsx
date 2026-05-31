@@ -149,10 +149,160 @@ export default function SolutionsGrid() {
             const milestones: Milestone[] = Array.isArray(s.milestones) ? s.milestones : [];
             const dateStr = s.last_update || s.updated_at || new Date().toISOString();
             const isComingSoon = s.status === 'coming-soon';
+
+            /* ── COMING SOON CARD ─────────────────────────────── */
+            if (isComingSoon) {
+              return (
+                <div key={s.id}
+                  style={{
+                    position: 'relative',
+                    borderRadius: '16px',
+                    padding: '2px',
+                    background: 'linear-gradient(135deg, var(--accent), #f07040, var(--accent))',
+                    backgroundSize: '200% 200%',
+                    animation: 'gradientShift 3s ease infinite',
+                    height: '100%',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)';
+                    (e.currentTarget as HTMLDivElement).style.boxShadow = '0 12px 40px rgba(232,99,58,0.25)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+                    (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                  }}
+                >
+                  <style>{`
+                    @keyframes gradientShift {
+                      0%   { background-position: 0% 50%; }
+                      50%  { background-position: 100% 50%; }
+                      100% { background-position: 0% 50%; }
+                    }
+                    @keyframes blink {
+                      0%, 100% { opacity: 1; }
+                      50%       { opacity: 0.35; }
+                    }
+                  `}</style>
+
+                  {/* Inner card — same layout as regular card */}
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    borderRadius: '14px',
+                    padding: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.1rem',
+                    height: '100%',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}>
+
+                    {/* Row 1: Name + COMING SOON badge */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
+                            {s.name}
+                          </h3>
+                        </div>
+                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>{s.tagline}</p>
+                      </div>
+                      {/* Animated badge replacing the status pill */}
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '5px', flexShrink: 0,
+                        background: 'var(--accent)', color: '#fff',
+                        fontSize: '10px', fontWeight: 700,
+                        letterSpacing: '0.1em', textTransform: 'uppercase',
+                        padding: '4px 10px', borderRadius: '100px',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'blink 1.2s ease-in-out infinite', flexShrink: 0 }} />
+                        Coming Soon
+                      </div>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                        <span>Progress</span>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.progress ?? 0}%</span>
+                      </div>
+                      <div style={{ height: '6px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${s.progress ?? 0}%`,
+                          background: 'linear-gradient(90deg, var(--accent), #f07040)',
+                          borderRadius: '100px',
+                        }} />
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                          Users
+                        </div>
+                        <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--text-primary)', lineHeight: 1 }}>
+                          {(s.users ?? 0).toLocaleString()}
+                        </div>
+                      </div>
+                      <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>Valuation</div>
+                        <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--text-primary)', lineHeight: 1, marginBottom: '4px' }}>
+                          {s.valuation || '$0.0M'}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                          {formatDate(dateStr).split(',').slice(0, 2).join(',')}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Milestones */}
+                    {milestones.length > 0 && (
+                      <div style={{ flexGrow: 1 }}>
+                        <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>Milestones</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                          {[...milestones].sort((a, b) => (a.done === b.done ? 0 : a.done ? -1 : 1)).map((m, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                              {m.done ? (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a9e6b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+                              ) : (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b8782a" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                              )}
+                              <span style={{ color: m.done ? 'var(--text-secondary)' : 'var(--text-primary)', textDecoration: m.done ? 'line-through' : 'none' }}>
+                                {m.title || m.label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {milestones.length === 0 && <div style={{ flexGrow: 1 }} />}
+
+                    {/* Footer */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        Last update &nbsp; {formatDate(dateStr)}
+                      </span>
+                      <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 600 }}>Stay tuned →</span>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            }
+
+            /* ── REGULAR CARD ─────────────────────────────────── */
             return (
               <div key={s.id} style={{
                 background: 'var(--bg-card)',
-                border: isComingSoon ? '1px dashed var(--accent)' : '1px solid var(--border)',
+                border: '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '1.5rem',
                 display: 'flex', flexDirection: 'column', gap: '1.1rem',
@@ -161,11 +311,11 @@ export default function SolutionsGrid() {
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)';
-                (e.currentTarget as HTMLDivElement).style.borderColor = isComingSoon ? 'var(--accent)' : 'var(--border-light)';
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-light)';
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLDivElement).style.borderColor = isComingSoon ? 'var(--accent)' : 'var(--border)';
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)';
               }}>
 
                 {/* Row 1: Name + status */}
@@ -174,13 +324,8 @@ export default function SolutionsGrid() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <h3 style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
                         {s.name}
-                        {isComingSoon && (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent-dim)" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                          </svg>
-                        )}
                       </h3>
-                      {s.url && !isComingSoon && (
+                      {s.url && (
                         <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', display: 'flex' }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -273,23 +418,12 @@ export default function SolutionsGrid() {
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                     Last update &nbsp; {formatDate(dateStr)}
                   </span>
-                  {isComingSoon ? (
-                    <span style={{
-                      fontSize: '11px', fontWeight: 600, color: 'var(--accent)',
-                      background: 'var(--accent-dim)', padding: '4px 10px',
-                      borderRadius: '100px', textTransform: 'uppercase',
-                      letterSpacing: '0.04em'
-                    }}>
-                      Coming Soon
-                    </span>
-                  ) : (
-                    <a href={`/solutions/${s.slug}`} style={{
-                      fontSize: '13px', fontWeight: 600, color: 'var(--accent)',
-                      display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
-                    }}>
-                      View Details →
-                    </a>
-                  )}
+                  <a href={`/solutions/${s.slug}`} style={{
+                    fontSize: '13px', fontWeight: 600, color: 'var(--accent)',
+                    display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
+                  }}>
+                    View Details →
+                  </a>
                 </div>
 
               </div>

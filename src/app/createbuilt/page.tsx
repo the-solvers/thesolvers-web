@@ -37,6 +37,10 @@ export default function CreateBuiltPage() {
   const [message, setMessage] = useState('');
   const [msgType, setMsgType] = useState<'success' | 'error'>('success');
 
+  // ── Drag State ────────────────────────────────────────────────
+  const dragIndex = React.useRef<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
+
   // ── Styles ────────────────────────────────────────────────────
   const inp: React.CSSProperties = {
     width: '100%', padding: '11px 13px', boxSizing: 'border-box',
@@ -76,6 +80,24 @@ export default function CreateBuiltPage() {
   };
   const removeMilestone = (i: number) =>
     setMilestones(ms => ms.filter((_, idx) => idx !== i));
+
+  const onDragStart = (i: number) => { dragIndex.current = i; };
+  const onDragEnter = (i: number) => { setDragOver(i); };
+  const onDragEnd   = () => {
+    if (dragIndex.current === null || dragOver === null || dragIndex.current === dragOver) {
+      dragIndex.current = null;
+      setDragOver(null);
+      return;
+    }
+    setMilestones(ms => {
+      const next = [...ms];
+      const [moved] = next.splice(dragIndex.current!, 1);
+      next.splice(dragOver, 0, moved);
+      return next;
+    });
+    dragIndex.current = null;
+    setDragOver(null);
+  };
 
   // ── Save ──────────────────────────────────────────────────────
   const handleSave = async () => {
@@ -260,7 +282,28 @@ export default function CreateBuiltPage() {
             {sectionHead('03', 'Milestones')}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
               {milestones.map((m, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <div
+                  key={i}
+                  draggable
+                  onDragStart={() => onDragStart(i)}
+                  onDragEnter={() => onDragEnter(i)}
+                  onDragOver={e => e.preventDefault()}
+                  onDragEnd={onDragEnd}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '10px 12px',
+                    background: dragOver === i ? 'var(--accent-dim)' : 'var(--bg)',
+                    borderRadius: '8px',
+                    border: dragOver === i ? '1px solid var(--accent)' : '1px solid var(--border)',
+                    cursor: 'grab',
+                    transition: 'background 0.15s, border-color 0.15s',
+                    userSelect: 'none',
+                  }}
+                >
+                  {/* Drag handle */}
+                  <span style={{ color: 'var(--text-muted)', fontSize: '14px', flexShrink: 0, cursor: 'grab', lineHeight: 1 }} title="Drag to reorder">
+                    ⠿
+                  </span>
                   <button
                     onClick={() => toggleMilestone(i)}
                     style={{

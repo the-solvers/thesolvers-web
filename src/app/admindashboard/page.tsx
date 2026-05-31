@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 // ── Types ──────────────────────────────────────────────────────
@@ -151,6 +151,25 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
+  // drag state
+  const dragIndex = React.useRef<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
+
+  const onDragStart = (i: number) => { dragIndex.current = i; };
+  const onDragEnter = (i: number) => { setDragOver(i); };
+  const onDragEnd   = () => {
+    if (dragIndex.current !== null && dragOver !== null && dragIndex.current !== dragOver) {
+      setMilestones(ms => {
+        const next = [...ms];
+        const [moved] = next.splice(dragIndex.current!, 1);
+        next.splice(dragOver, 0, moved);
+        return next;
+      });
+    }
+    dragIndex.current = null;
+    setDragOver(null);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase
@@ -224,7 +243,31 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         <Row label="Milestones">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {milestones.map((m, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                key={i}
+                draggable
+                onDragStart={() => onDragStart(i)}
+                onDragEnter={() => onDragEnter(i)}
+                onDragOver={e => e.preventDefault()}
+                onDragEnd={onDragEnd}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '6px 8px',
+                  background: dragOver === i ? 'var(--accent-dim)' : 'transparent',
+                  border: dragOver === i ? '1px solid var(--accent)' : '1px solid transparent',
+                  borderRadius: '8px',
+                  transition: 'background 0.15s, border-color 0.15s',
+                  cursor: 'grab',
+                  userSelect: 'none',
+                }}
+              >
+                {/* drag handle */}
+                <span
+                  title="Drag to reorder"
+                  style={{ color: 'var(--text-muted)', fontSize: '16px', flexShrink: 0, cursor: 'grab', lineHeight: 1 }}
+                >
+                  ⠿
+                </span>
                 <input
                   type="checkbox"
                   checked={m.done}
@@ -233,7 +276,7 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
                     newM[i] = { ...newM[i], done: e.target.checked };
                     setMilestones(newM);
                   }}
-                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
                 />
                 <input
                   style={{ ...inp, flex: 1, padding: '6px 10px' }}
