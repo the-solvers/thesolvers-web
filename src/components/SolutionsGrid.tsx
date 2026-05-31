@@ -161,11 +161,11 @@ export default function SolutionsGrid() {
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)';
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-light)';
+                (e.currentTarget as HTMLDivElement).style.borderColor = isComingSoon ? 'var(--accent)' : 'var(--border-light)';
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)';
+                (e.currentTarget as HTMLDivElement).style.borderColor = isComingSoon ? 'var(--accent)' : 'var(--border)';
               }}>
 
                 {/* Row 1: Name + status */}
