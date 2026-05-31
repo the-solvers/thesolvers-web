@@ -338,24 +338,28 @@ export default function CreateBuiltPage() {
           </p>
 
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border-light)',
+            background: 'var(--bg-card)',
+            border: status === 'coming-soon' ? '1px dashed var(--accent)' : '1px solid var(--border)',
             borderRadius: '16px', padding: '1.4rem',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           }}>
             {/* Card Header */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                   {name || 'Product Name'}
-                </span>
-                {url && <span style={{ fontSize: '13px', color: '#555' }}>↗</span>}
+                </h3>
+                {status === 'coming-soon' && (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent-dim)" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                )}
               </div>
               <span style={{
-                fontSize: '11px', fontWeight: 600, padding: '3px 10px',
-                borderRadius: '20px', ...bc,
-              }}>
-                {status || 'on-track'}
-              </span>
+                fontSize: '11px', fontWeight: 600, padding: '4px 10px',
+                borderRadius: '100px', ...badgeColor(status),
+                textTransform: 'capitalize', letterSpacing: '0.04em'
+              }}>{status}</span>
             </div>
 
             {/* Tagline */}

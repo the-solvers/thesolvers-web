@@ -152,7 +152,7 @@ export default function SolutionsGrid() {
             return (
               <div key={s.id} style={{
                 background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
+                border: isComingSoon ? '1px dashed var(--accent)' : '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '1.5rem',
                 display: 'flex', flexDirection: 'column', gap: '1.1rem',
@@ -172,8 +172,13 @@ export default function SolutionsGrid() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
+                      <h3 style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
                         {s.name}
+                        {isComingSoon && (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent-dim)" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                          </svg>
+                        )}
                       </h3>
                       {s.url && !isComingSoon && (
                         <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', display: 'flex' }}>
