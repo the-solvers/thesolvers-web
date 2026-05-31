@@ -46,15 +46,13 @@ export default function SolutionsGrid() {
     new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <section id="solutions" style={{ padding: '0 3rem 100px' }}>
+    <section id="solutions" style={{ padding: '0 2rem 100px', maxWidth: '1200px', margin: '0 auto' }}>
 
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'flex-end',
         justifyContent: 'space-between',
         marginBottom: '2.5rem',
-        borderBottom: '1px solid var(--border)',
-        paddingBottom: '1.5rem',
         flexWrap: 'wrap', gap: '1rem',
       }}>
         <div>
@@ -187,9 +185,10 @@ export default function SolutionsGrid() {
                             </svg>
                           )}
                           <span style={{
-                            color: m.done ? 'var(--text-muted)' : 'var(--text-primary)',
+                            color: m.done ? 'var(--text-secondary)' : 'var(--text-primary)',
                             textDecoration: m.done ? 'line-through' : 'none',
-                          }}>{m.title}</span>
+                            fontSize: '13px',
+                          }}>{m.title || m.label}</span>
                         </div>
                       ))}
                     </div>
