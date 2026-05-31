@@ -4,9 +4,11 @@ export default function Footer() {
     <footer style={{
       padding: '3rem 2rem',
       maxWidth: '1200px', margin: '0 auto',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      flexWrap: 'wrap', gap: '1rem',
     }}>
+      <div className="footer-inner" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: '1rem',
+      }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
           width: '28px', height: '28px', background: 'var(--accent)',
@@ -14,7 +16,7 @@ export default function Footer() {
           fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '14px', color: 'white',
         }}>S</div>
         <span style={{ fontFamily: 'var(--font-display)', fontSize: '16px' }}>TheSolvers</span>
-        <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>— Building 100 solutions to real problems</span>
+        <span className="footer-tagline" style={{ color: 'var(--text-muted)', fontSize: '13px' }}>— Building 100 solutions to real problems</span>
       </div>
       <div style={{ display: 'flex', gap: '1.5rem' }}>
         {[
@@ -33,6 +35,7 @@ export default function Footer() {
       <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
         © 2026 TheSolvers. All rights reserved.
       </p>
+      </div>
     </footer>
   );
 }

@@ -54,7 +54,7 @@ export default function ContactPage() {
       <main style={{ minHeight: '100vh', paddingTop: '64px' }}>
 
         {/* Page Header */}
-        <section style={{
+        <section className="contact-header" style={{
           padding: '72px 2rem 56px',
           maxWidth: '1100px',
           margin: '0 auto',
@@ -85,7 +85,7 @@ export default function ContactPage() {
         </section>
 
         {/* Main Grid */}
-        <section style={{
+        <section className="contact-grid" style={{
           maxWidth: '1100px',
           margin: '0 auto',
           padding: '0 2rem 120px',
@@ -175,7 +175,7 @@ export default function ContactPage() {
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {/* Name + Email row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="contact-name-email" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{
                       display: 'block',

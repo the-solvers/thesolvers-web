@@ -103,14 +103,14 @@ export default function SolutionsGrid() {
   const showMainCards = statusFilter !== 'Coming Soon';
 
   return (
-    <section id="solutions" style={{ padding: '0 2rem 100px', maxWidth: '1200px', margin: '0 auto' }}>
+    <section id="solutions" className="solutions-section" style={{ padding: '0 2rem 100px', maxWidth: '1200px', margin: '0 auto' }}>
 
       {/* Header */}
-      <div style={{
-        display: 'flex', alignItems: 'flex-end',
-        justifyContent: 'space-between',
-        marginBottom: '2.5rem',
-        flexWrap: 'wrap', gap: '1rem',
+      <div className="solutions-header" style={{
+      display: 'flex', alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      marginBottom: '2.5rem',
+      flexWrap: 'wrap', gap: '1rem',
       }}>
         <div>
           <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
@@ -153,7 +153,7 @@ export default function SolutionsGrid() {
           No solutions match this filter.
         </p>
       ) : showMainCards ? (
-        <div style={{
+        <div className="solutions-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: '16px',

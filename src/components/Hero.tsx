@@ -65,7 +65,7 @@ export default function Hero() {
   ];
 
   return (
-    <section style={{
+    <section className="hero-section" style={{
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
@@ -84,13 +84,13 @@ export default function Hero() {
       }} />
 
       {/* Two-column layout */}
-      <div style={{
-        position: 'relative', zIndex: 1,
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '4rem',
-        alignItems: 'center',
-        width: '100%',
+      <div className="hero-grid" style={{
+      position: 'relative', zIndex: 1,
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '4rem',
+      alignItems: 'center',
+      width: '100%',
       }}>
 
         {/* Left — Content */}
@@ -108,7 +108,7 @@ export default function Hero() {
             Solutions.
           </h1>
 
-          <p style={{
+          <p className="hero-desc" style={{
             fontSize: 'clamp(15px, 1.8vw, 18px)',
             color: 'var(--text-secondary)',
             maxWidth: '420px',
@@ -119,7 +119,7 @@ export default function Hero() {
           </p>
 
           {/* CTA buttons */}
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '3.5rem' }}>
+          <div className="hero-cta" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '3.5rem' }}>
             <a
               href="#solutions"
               style={{
@@ -156,8 +156,7 @@ export default function Hero() {
             </a>
           </div>
 
-          {/* Live stats */}
-          <div style={{
+          <div className="hero-stats" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '1px',
@@ -185,7 +184,7 @@ export default function Hero() {
         </div>
 
         {/* Right — Illustration */}
-        <div style={{
+        <div className="hero-image" style={{
           position: 'relative',
           width: '100%',
           aspectRatio: '1 / 1',

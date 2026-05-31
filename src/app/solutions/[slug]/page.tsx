@@ -107,7 +107,7 @@ export default function SolutionPage() {
   return (
     <>
       <Navbar />
-      <main style={{ paddingTop: '100px', paddingBottom: '100px', minHeight: '100vh' }}>
+      <main className="solution-main" style={{ paddingTop: '100px', paddingBottom: '100px', minHeight: '100vh' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 2rem' }}>
 
           {/* Breadcrumb */}
@@ -128,14 +128,14 @@ export default function SolutionPage() {
           </div>
 
           {/* Hero Section */}
-          <div style={{
+          <div className="solution-hero-card" style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border)',
             borderRadius: '20px',
             padding: '2.5rem',
             marginBottom: '20px',
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+            <div className="solution-hero-top" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
               <div>
                 <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
                   $ solution_detail
@@ -189,7 +189,7 @@ export default function SolutionPage() {
           </div>
 
           {/* Stats Row */}
-          <div style={{
+          <div className="solution-stats-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
             gap: '14px',
@@ -216,7 +216,7 @@ export default function SolutionPage() {
 
           {/* Problem & Solution */}
           {(solution.problem || solution.solution) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
+            <div className="solution-problem-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
               {solution.problem && (
                 <div style={{
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -245,7 +245,7 @@ export default function SolutionPage() {
           )}
 
           {/* Tech Stack + Milestones */}
-          <div style={{ display: 'grid', gridTemplateColumns: techList.length > 0 && milestones.length > 0 ? '1fr 1fr' : '1fr', gap: '14px', marginBottom: '20px' }}>
+          <div className="solution-tech-milestones" style={{ display: 'grid', gridTemplateColumns: techList.length > 0 && milestones.length > 0 ? '1fr 1fr' : '1fr', gap: '14px', marginBottom: '20px' }}>
 
             {/* Tech Stack */}
             {techList.length > 0 && (

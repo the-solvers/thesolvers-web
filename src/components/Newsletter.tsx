@@ -41,11 +41,11 @@ export default function Newsletter() {
   };
 
   return (
-    <section id="newsletter" style={{
+    <section id="newsletter" className="newsletter-section" style={{
       padding: '80px 2rem',
       overflow: 'hidden',
     }}>
-      <div style={{
+      <div className="newsletter-grid" style={{
         maxWidth: '1100px',
         margin: '0 auto',
         display: 'grid',
@@ -93,7 +93,7 @@ export default function Newsletter() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', gap: '8px', maxWidth: '420px' }}>
+        <div className="newsletter-input-row" style={{ display: 'flex', gap: '8px', maxWidth: '420px' }}>
                 <input
                   type="email"
                   placeholder="your@email.com"
@@ -136,7 +136,7 @@ export default function Newsletter() {
         </div>
 
         {/* Right — Illustration */}
-        <div style={{
+        <div className="newsletter-image" style={{
           position: 'relative',
           width: '320px',
           height: '320px',
