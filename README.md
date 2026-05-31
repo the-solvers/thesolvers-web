@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <img src="public/logo.png" alt="TheSolvers Logo" width="80" />
+</p>
+
+<h1 align="center">TheSolvers</h1>
+
+<p align="center">
+  100 real problems. 100 real solutions. Built in public.
+</p>
+
+---
+
+<p align="center">
+  <img src="public/hero-illustration.png" alt="TheSolvers Hero" width="600" />
+</p>
+
+---
+
+## Overview
+
+TheSolvers is a public challenge to find and solve 100 real-world problems over 100 weeks. Each week, a problem is identified, a solution is built, and the entire process is documented — including what worked and what did not.
+
+The website serves as the central hub: showcasing solutions, publishing weekly blog posts, and allowing people to follow the journey.
+
+## Tech Stack
+
+- **Framework** — Next.js 15 (App Router)
+- **Language** — TypeScript
+- **Styling** — Vanilla CSS with CSS variables
+- **Database** — Supabase (PostgreSQL)
+- **Fonts** — Playfair Display, DM Sans (Google Fonts)
+
+## Pages
+
+| Route | Description |
+|---|---|
+| `/` | Home — hero, solutions grid, newsletter |
+| `/blog` | Blog listing — fetched from Supabase |
+| `/contact` | Contact page with form connected to Supabase |
+| `/createadminblogs` | Admin editor to write and publish blog posts |
+
+## Database Tables
+
+Two Supabase tables are required:
+
+**`subscribers`** — stores newsletter emails
+
+```sql
+CREATE TABLE subscribers (
+  id bigint generated always as identity primary key,
+  email text not null unique,
+  created_at timestamptz default now() not null
+);
+```
+
+**`contacts`** — stores contact form submissions
+
+```sql
+CREATE TABLE contacts (
+  id bigint generated always as identity primary key,
+  name text not null,
+  email text not null,
+  message text not null,
+  created_at timestamptz default now() not null
+);
+```
+
+**`blogs`** — stores blog posts
+
+```sql
+CREATE TABLE blogs (
+  id bigint generated always as identity primary key,
+  title text not null,
+  slug text not null unique,
+  excerpt text not null,
+  content text not null,
+  tags text[] default '{}',
+  author text not null default 'TheSolvers Team',
+  read_time text default '3 min read',
+  published boolean default false,
+  published_at timestamptz,
+  created_at timestamptz default now() not null
+);
+```
+
+## Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+```
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Links
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Website — [thesolvers.in](https://thesolvers.in)
+- GitHub — [github.com/the-solvers](https://github.com/the-solvers)
+- Contact — [solvers.real@gmail.com](mailto:solvers.real@gmail.com)

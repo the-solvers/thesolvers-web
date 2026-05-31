@@ -17,11 +17,16 @@ export default function Footer() {
         <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>— Building 100 solutions to real problems</span>
       </div>
       <div style={{ display: 'flex', gap: '1.5rem' }}>
-        {['Twitter', 'GitHub', 'LinkedIn'].map(s => (
-          <a key={s} href="#" style={{ fontSize: '13px', color: 'var(--text-muted)', transition: 'color 0.2s' }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
-            {s}
+        {[
+          { label: 'Twitter', href: '#' },
+          { label: 'GitHub', href: 'https://github.com/the-solvers' },
+          { label: 'LinkedIn', href: '#' },
+        ].map(s => (
+          <a key={s.label} href={s.href} target={s.href !== '#' ? '_blank' : undefined} rel="noopener noreferrer"
+            style={{ fontSize: '13px', color: 'var(--text-muted)', transition: 'color 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+            {s.label}
           </a>
         ))}
       </div>

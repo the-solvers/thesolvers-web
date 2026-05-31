@@ -86,7 +86,7 @@ export default function Hero() {
             onMouseLeave={e => e.currentTarget.style.background = 'var(--accent)'}>
               See All Solutions →
             </a>
-            <a href="#newsletter" style={{
+            <a href="https://github.com/the-solvers" target="_blank" rel="noopener noreferrer" style={{
               padding: '13px 30px', fontSize: '15px',
               border: '1px solid var(--border-light)', color: 'var(--text-secondary)',
               borderRadius: '8px', fontWeight: 400,
