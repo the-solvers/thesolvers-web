@@ -36,16 +36,12 @@ export default function Navbar() {
         padding: '0 2rem',
         height: '64px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: scrolled
-          ? dark
-            ? 'rgba(15, 14, 13, 0.95)'
-            : 'rgba(237, 234, 227, 0.94)'
-          : menuOpen
-            ? dark ? 'rgba(15,14,13,0.98)' : 'rgba(237,234,227,0.98)'
-            : 'transparent',
-        backdropFilter: scrolled || menuOpen ? 'blur(20px)' : 'none',
-        boxShadow: scrolled ? '0 1px 24px rgba(0,0,0,0.07)' : 'none',
-        transition: 'all 0.35s ease',
+        background: dark ? '#0f0e0d' : '#EDEAE3',
+        backdropFilter: 'none',
+        boxShadow: 'none',
+        borderBottom: 'none',
+        outline: 'none',
+        transition: 'background 0.35s ease',
       }}>
 
         {/* Logo */}
@@ -91,8 +87,8 @@ export default function Navbar() {
             title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             style={{
               width: '34px', height: '34px',
-              background: 'var(--bg-hover)',
-              border: '1px solid var(--border)',
+              background: scrolled || menuOpen ? 'var(--bg-hover)' : 'transparent',
+              border: scrolled || menuOpen ? '1px solid var(--border)' : '1px solid transparent',
               borderRadius: '9px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',

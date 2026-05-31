@@ -76,6 +76,11 @@ a {
   text-decoration: none;
 }
 
+nav {
+  border: none !important;
+  outline: none !important;
+}
+
 /* ── Mobile Responsive ── */
 @media (max-width: 768px) {
 
