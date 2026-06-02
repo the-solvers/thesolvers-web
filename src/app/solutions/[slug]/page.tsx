@@ -21,6 +21,7 @@ type Solution = {
   category?: string;
   tech_stack?: string;
   problem?: string;
+  description?: string;
   solution?: string;
   week_number?: number;
   valuation_since?: string;
@@ -103,6 +104,8 @@ export default function SolutionPage() {
       ? solution.tech_stack
       : solution.tech_stack.split(',').map((t: string) => t.trim())
     : [];
+  const problemText = solution.problem?.trim();
+  const solutionText = solution.solution?.trim() || solution.description?.trim();
 
   return (
     <>
@@ -215,9 +218,9 @@ export default function SolutionPage() {
           </div>
 
           {/* Problem & Solution */}
-          {(solution.problem || solution.solution) && (
-            <div className="solution-problem-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-              {solution.problem && (
+          {(problemText || solutionText) && (
+            <div className="solution-problem-grid" style={{ display: 'grid', gridTemplateColumns: problemText && solutionText ? '1fr 1fr' : '1fr', gap: '14px', marginBottom: '20px' }}>
+              {problemText && (
                 <div style={{
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
                   borderRadius: '16px', padding: '1.75rem',
@@ -226,10 +229,10 @@ export default function SolutionPage() {
                     <span style={{ fontSize: '18px' }}>⚡</span>
                     <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>The Problem</p>
                   </div>
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{solution.problem}</p>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{problemText}</p>
                 </div>
               )}
-              {solution.solution && (
+              {solutionText && (
                 <div style={{
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
                   borderRadius: '16px', padding: '1.75rem',
@@ -238,7 +241,7 @@ export default function SolutionPage() {
                     <span style={{ fontSize: '18px' }}>🔧</span>
                     <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>The Solution</p>
                   </div>
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{solution.solution}</p>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{solutionText}</p>
                 </div>
               )}
             </div>
