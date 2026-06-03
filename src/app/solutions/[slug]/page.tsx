@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { getMilestoneProgress } from '@/lib/progress';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -98,6 +99,7 @@ export default function SolutionPage() {
 
   const st = statusColor[solution.status] || statusColor['planned'];
   const milestones: Milestone[] = Array.isArray(solution.milestones) ? solution.milestones : [];
+  const progress = getMilestoneProgress(milestones, solution.progress ?? 0);
   const dateStr = solution.last_update || solution.updated_at || new Date().toISOString();
   const techList = solution.tech_stack
     ? Array.isArray(solution.tech_stack)
@@ -177,12 +179,12 @@ export default function SolutionPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                 <span>Build Progress</span>
-                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{solution.progress ?? 0}%</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{progress}%</span>
               </div>
               <div style={{ height: '8px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%',
-                  width: `${solution.progress ?? 0}%`,
+                  width: `${progress}%`,
                   background: 'linear-gradient(90deg, var(--accent), #f07040)',
                   borderRadius: '100px',
                   transition: 'width 1s ease',

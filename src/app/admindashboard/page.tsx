@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getMilestoneProgress } from '@/lib/progress';
 
 // ── Types ──────────────────────────────────────────────────────
 type Milestone = { title?: string; label?: string; done: boolean };
@@ -141,13 +142,13 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
     name: solution.name,
     tagline: solution.tagline,
     status: solution.status,
-    progress: String(solution.progress ?? 0),
     users: String(solution.users ?? 0),
     valuation: solution.valuation ?? '',
     url: solution.url ?? '',
     last_update: solution.last_update ?? '',
   });
   const [milestones, setMilestones] = useState<Milestone[]>(Array.isArray(solution.milestones) ? solution.milestones : []);
+  const progress = getMilestoneProgress(milestones, solution.progress ?? 0);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -178,7 +179,7 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         name: form.name,
         tagline: form.tagline,
         status: form.status,
-        progress: Number(form.progress),
+        progress,
         users: Number(form.users),
         valuation: form.valuation,
         url: form.url,
@@ -224,7 +225,10 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         </Row>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <Row label="Progress (%)">
-            <input style={inp} type="number" min="0" max="100" value={form.progress} onChange={e => setForm(f => ({ ...f, progress: e.target.value }))} />
+            <div style={{ ...inp, display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+              <span>{milestones.filter(m => m.done).length}/{milestones.length}</span>
+              <strong style={{ color: 'var(--text-primary)' }}>{progress}%</strong>
+            </div>
           </Row>
           <Row label="Users">
             <input style={inp} type="number" min="0" value={form.users} onChange={e => setForm(f => ({ ...f, users: e.target.value }))} />
@@ -581,6 +585,7 @@ export default function AdminDashboard() {
                 const st = statusColor[s.status] || statusColor['planned'];
                 const milestones: Milestone[] = Array.isArray(s.milestones) ? s.milestones : [];
                 const doneMilestones = milestones.filter(m => m.done).length;
+                const progress = getMilestoneProgress(milestones, s.progress ?? 0);
                 return (
                   <div key={s.id} style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
@@ -600,7 +605,7 @@ export default function AdminDashboard() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px' }}>
                       {[
-                        { label: 'Progress',    value: `${s.progress ?? 0}%` },
+                        { label: 'Progress',    value: `${progress}%` },
                         { label: 'Users',       value: fmt(s.users ?? 0) },
                         { label: 'Valuation',   value: s.valuation || '—' },
                         { label: 'Milestones',  value: `${doneMilestones}/${milestones.length}` },
@@ -614,7 +619,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div style={{ height: '5px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${s.progress ?? 0}%`, background: 'linear-gradient(90deg, var(--accent), #f07040)', borderRadius: '100px' }} />
+                      <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg, var(--accent), #f07040)', borderRadius: '100px' }} />
                     </div>
                   </div>
                 );

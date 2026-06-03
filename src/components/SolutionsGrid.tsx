@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getMilestoneProgress } from '@/lib/progress';
 
 type Milestone = { title?: string; label?: string; done: boolean };
 
@@ -147,6 +148,7 @@ export default function SolutionsGrid() {
           {filtered.map(s => {
             const st = statusColor[s.status] || statusColor['planned'];
             const milestones: Milestone[] = Array.isArray(s.milestones) ? s.milestones : [];
+            const progress = getMilestoneProgress(milestones, s.progress ?? 0);
             const dateStr = s.last_update || s.updated_at || new Date().toISOString();
             const isComingSoon = s.status === 'coming-soon';
 
@@ -226,12 +228,12 @@ export default function SolutionsGrid() {
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
                         <span>Progress</span>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.progress ?? 0}%</span>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{progress}%</span>
                       </div>
                       <div style={{ height: '6px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden' }}>
                         <div style={{
                           height: '100%',
-                          width: `${s.progress ?? 0}%`,
+                          width: `${progress}%`,
                           background: 'linear-gradient(90deg, var(--accent), #f07040)',
                           borderRadius: '100px',
                         }} />
@@ -348,12 +350,12 @@ export default function SolutionsGrid() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
                     <span>Progress</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.progress ?? 0}%</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{progress}%</span>
                   </div>
                   <div style={{ height: '6px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden' }}>
                     <div style={{
                       height: '100%',
-                      width: `${s.progress ?? 0}%`,
+                      width: `${progress}%`,
                       background: 'linear-gradient(90deg, var(--accent), #f07040)',
                       borderRadius: '100px',
                       transition: 'width 0.8s ease',

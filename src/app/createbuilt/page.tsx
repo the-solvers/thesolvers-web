@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getMilestoneProgress } from '@/lib/progress';
 
 const CATEGORIES = ['Productivity', 'Health', 'Finance', 'Education', 'Developer Tools', 'Social', 'Environment', 'Other'];
 const STATUSES = ['on-track', 'building', 'live', 'planned', 'paused', 'coming-soon'];
@@ -20,7 +21,6 @@ export default function CreateBuiltPage() {
   const [weekNumber, setWeekNumber] = useState('');
 
   // ── Card-specific Fields (from image) ────────────────────────
-  const [progress, setProgress] = useState('0');
   const [users, setUsers] = useState('0');
   const [valuation, setValuation] = useState('0.0');
   const [valuationSince, setValuationSince] = useState('');
@@ -123,7 +123,7 @@ export default function CreateBuiltPage() {
       tech_stack: techStack.trim() || null,
       users: parseInt(users) || 0,
       week_number: weekNumber ? parseInt(weekNumber) : null,
-      progress: parseInt(progress) || 0,
+      progress: getMilestoneProgress(milestones),
       valuation: valuation.trim() || null,
       valuation_since: valuationSince.trim() || null,
       last_update: lastUpdate || null,
@@ -140,7 +140,7 @@ export default function CreateBuiltPage() {
       setName(''); setTagline(''); setProblem(''); setDescription('');
       setUrl(''); setTechStack(''); setWeekNumber('');
       setCategory('Productivity'); setStatus('on-track');
-      setProgress('0'); setUsers('0'); setValuation('0.0'); setValuationSince('');
+      setUsers('0'); setValuation('0.0'); setValuationSince('');
       setLastUpdate(''); setMilestones([]);
     }
   };
@@ -154,9 +154,7 @@ export default function CreateBuiltPage() {
     return { bg: 'rgba(255,255,255,0.08)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.12)' };
   };
 
-  const bc = badgeColor(status);
-  const prog = Math.min(100, Math.max(0, parseInt(progress) || 0));
-  const val = parseFloat(valuation) || 0;
+  const prog = getMilestoneProgress(milestones);
 
   const sectionHead = (n: string, t: string) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.25rem' }}>
@@ -248,8 +246,17 @@ export default function CreateBuiltPage() {
           {/* Section 2 — Progress & Stats */}
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
             {sectionHead('02', 'Progress & Stats')}
-            {F('Progress %', 'How much is complete? (0–100)',
-              <input type="number" min="0" max="100" value={progress} onChange={e => setProgress(e.target.value)} placeholder="75" style={inp} onFocus={onF} onBlur={onB} />
+            {F('Progress %', 'Calculated from completed milestones',
+              <div style={{
+                ...inp,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                color: 'var(--text-secondary)',
+              }}>
+                <span>{milestones.filter(m => m.done).length}/{milestones.length} milestones complete</span>
+                <strong style={{ color: 'var(--text-primary)' }}>{prog}%</strong>
+              </div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
