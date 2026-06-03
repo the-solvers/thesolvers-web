@@ -21,6 +21,9 @@ type Solution = {
   last_update: string;
   category?: string;
   tech_stack?: string;
+  problem?: string;
+  description?: string;
+  solution?: string;
 };
 
 type ComingSoonItem = {
@@ -146,6 +149,8 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
     valuation: solution.valuation ?? '',
     url: solution.url ?? '',
     last_update: solution.last_update ?? '',
+    problem: solution.problem ?? '',
+    description: solution.description ?? solution.solution ?? '',
   });
   const [milestones, setMilestones] = useState<Milestone[]>(Array.isArray(solution.milestones) ? solution.milestones : []);
   const progress = getMilestoneProgress(milestones, solution.progress ?? 0);
@@ -183,6 +188,8 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         users: Number(form.users),
         valuation: form.valuation,
         url: form.url,
+        problem: form.problem.trim(),
+        description: form.description.trim(),
         milestones: milestones,
         last_update: form.last_update || new Date().toISOString().split('T')[0],
       })
@@ -242,6 +249,22 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         </Row>
         <Row label="Last Update">
           <input style={inp} type="date" value={form.last_update?.split('T')[0] ?? ''} onChange={e => setForm(f => ({ ...f, last_update: e.target.value }))} />
+        </Row>
+        <Row label="Problem">
+          <textarea
+            style={{ ...inp, minHeight: '82px', resize: 'vertical', lineHeight: 1.55 }}
+            value={form.problem}
+            onChange={e => setForm(f => ({ ...f, problem: e.target.value }))}
+            placeholder="The real problem this project solves..."
+          />
+        </Row>
+        <Row label="Solution">
+          <textarea
+            style={{ ...inp, minHeight: '82px', resize: 'vertical', lineHeight: 1.55 }}
+            value={form.description}
+            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+            placeholder="What you built to solve it..."
+          />
         </Row>
 
         <Row label="Milestones">

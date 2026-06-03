@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  ADMIN_COOKIE_LEGACY,
+  ADMIN_COOKIE_VERIFIED,
+  getStoredAdminPassword,
+} from '@/lib/admin-auth';
 
 const PROTECTED_ROUTES = [
   '/admindashboard',
@@ -6,37 +11,6 @@ const PROTECTED_ROUTES = [
   '/createcomingsoon',
   '/createadminblogs',
 ];
-
-const COOKIE_NAME = 'admin_auth';
-const COOKIE_VERIFIED = 'admin_verified'; // safe boolean cookie, no password stored
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_KEY =
-  process.env.SUPABASE_ANON_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
-
-/** Fetch the stored password hash from Supabase admin_config table */
-async function getStoredPassword(): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/admin_config?select=value&key=eq.admin_password&limit=1`,
-      {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        // Edge runtime — no node cache, always fresh
-        cache: 'no-store',
-      }
-    );
-    if (!res.ok) return null;
-    const rows = await res.json() as { value: string }[];
-    return rows?.[0]?.value ?? null;
-  } catch {
-    return null;
-  }
-}
 
 function buildLoginPage(pathname: string, error = false): NextResponse {
   const html = `
@@ -110,7 +84,7 @@ function buildLoginPage(pathname: string, error = false): NextResponse {
     </div>
     <h2>Admin Access</h2>
     <p class="subtitle">Enter the password to continue.</p>
-    <form method="POST" action="/__admin_auth?redirect=${encodeURIComponent(pathname)}">
+    <form method="POST" action="/admin-auth?redirect=${encodeURIComponent(pathname)}">
       <label>Password</label>
       <input type="password" name="password" placeholder="••••••••" autofocus />
       <button type="submit">Enter →</button>
@@ -129,49 +103,21 @@ function buildLoginPage(pathname: string, error = false): NextResponse {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── Handle the auth POST endpoint ────────────────────────────────────────
-  if (pathname === '/__admin_auth' && request.method === 'POST') {
-    const redirect = request.nextUrl.searchParams.get('redirect') || '/admindashboard';
-
-    // Parse form body
-    const body = await request.text();
-    const params = new URLSearchParams(body);
-    const submitted = (params.get('password') ?? '').trim();
-
-    // Fetch stored password from Supabase (server-side only)
-    const stored = await getStoredPassword();
-
-    if (stored && submitted === stored) {
-      // Set a simple verified cookie — no password value stored
-      const response = NextResponse.redirect(new URL(redirect, request.url));
-      response.cookies.set(COOKIE_VERIFIED, 'true', {
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24, // 24 hours
-        path: '/',
-      });
-      return response;
-    }
-
-    // Wrong password — re-render login with error
-    return buildLoginPage(redirect, true);
-  }
-
   // ── Guard protected routes ────────────────────────────────────────────────
   const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
   if (!isProtected) return NextResponse.next();
 
   // Check verified cookie
-  const verified = request.cookies.get(COOKIE_VERIFIED);
+  const verified = request.cookies.get(ADMIN_COOKIE_VERIFIED);
   if (verified?.value === 'true') return NextResponse.next();
 
   // Legacy: accept old password cookie during transition
-  const legacy = request.cookies.get(COOKIE_NAME);
+  const legacy = request.cookies.get(ADMIN_COOKIE_LEGACY);
   if (legacy?.value) {
-    const stored = await getStoredPassword();
+    const stored = await getStoredAdminPassword();
     if (stored && legacy.value === stored) {
       const response = NextResponse.next();
-      response.cookies.set(COOKIE_VERIFIED, 'true', {
+      response.cookies.set(ADMIN_COOKIE_VERIFIED, 'true', {
         httpOnly: true, sameSite: 'strict', maxAge: 60 * 60 * 24, path: '/',
       });
       return response;
@@ -179,12 +125,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // Show login gate
-  return buildLoginPage(pathname);
+  return buildLoginPage(pathname, request.nextUrl.searchParams.get('admin_error') === '1');
 }
 
 export const config = {
   matcher: [
-    '/__admin_auth',
     '/admindashboard/:path*',
     '/createbuilt/:path*',
     '/createcomingsoon/:path*',
