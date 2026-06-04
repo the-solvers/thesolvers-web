@@ -142,8 +142,8 @@ export default function SolutionsGrid() {
       ) : (
         <div className="solutions-grid" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '16px',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '28px',
         }}>
           {filtered.map(s => {
             const st = statusColor[s.status] || statusColor['planned'];
@@ -164,15 +164,19 @@ export default function SolutionsGrid() {
                     backgroundSize: '200% 200%',
                     animation: 'gradientShift 3s ease infinite',
                     height: '100%',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease',
+                    position: 'relative',
+                    zIndex: 1,
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)';
-                    (e.currentTarget as HTMLDivElement).style.boxShadow = '0 12px 40px rgba(232,99,58,0.25)';
+                    (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.03) translateY(-5px)';
+                    (e.currentTarget as HTMLDivElement).style.boxShadow = '0 20px 50px rgba(232,99,58,0.28)';
+                    (e.currentTarget as HTMLDivElement).style.zIndex = '3';
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+                    (e.currentTarget as HTMLDivElement).style.transform = 'scale(1) translateY(0)';
                     (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                    (e.currentTarget as HTMLDivElement).style.zIndex = '1';
                   }}
                 >
                   <style>{`
@@ -308,16 +312,22 @@ export default function SolutionsGrid() {
                 borderRadius: '16px',
                 padding: '1.5rem',
                 display: 'flex', flexDirection: 'column', gap: '1.1rem',
-                transition: 'transform 0.2s, border-color 0.2s',
+                transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), border-color 0.2s, box-shadow 0.3s ease',
                 height: '100%',
+                position: 'relative',
+                zIndex: 1,
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.03) translateY(-5px)';
                 (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-light)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 20px 50px rgba(0,0,0,0.4)';
+                (e.currentTarget as HTMLDivElement).style.zIndex = '3';
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'scale(1) translateY(0)';
                 (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                (e.currentTarget as HTMLDivElement).style.zIndex = '1';
               }}>
 
                 {/* Row 1: Name + status */}
