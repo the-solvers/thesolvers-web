@@ -58,6 +58,7 @@ export default function SolutionsGrid() {
       const { data } = await supabase
         .from('solutions')
         .select('*')
+        .order('display_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true });
       setSolutions(data || []);
       setLoading(false);
