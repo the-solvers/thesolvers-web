@@ -10,7 +10,7 @@ const PROTECTED_ROUTES = [
 const PASSWORD = 'Gate@28';
 const COOKIE_NAME = 'admin_auth';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if route is protected
