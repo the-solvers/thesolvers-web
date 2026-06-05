@@ -69,6 +69,7 @@ export default function Hero() {
       maxWidth: '1300px',
       margin: '0 auto',
       position: 'relative',
+      overflow: 'hidden',
     }}>
 
       {/* Accent glow */}

@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body suppressHydrationWarning style={{ overflowX: 'hidden', maxWidth: '100vw' }}>{children}</body>
     </html>
   );
 }

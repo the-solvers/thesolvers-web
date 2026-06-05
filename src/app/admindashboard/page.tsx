@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getMilestoneProgress } from '@/lib/progress';
 
 // ── Types ──────────────────────────────────────────────────────
 type Milestone = { title?: string; label?: string; done: boolean };
@@ -20,6 +21,9 @@ type Solution = {
   last_update: string;
   category?: string;
   tech_stack?: string;
+  problem?: string;
+  description?: string;
+  solution?: string;
 };
 
 type ComingSoonItem = {
@@ -141,15 +145,36 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
     name: solution.name,
     tagline: solution.tagline,
     status: solution.status,
-    progress: String(solution.progress ?? 0),
     users: String(solution.users ?? 0),
     valuation: solution.valuation ?? '',
     url: solution.url ?? '',
     last_update: solution.last_update ?? '',
+    problem: solution.problem ?? '',
+    description: solution.description ?? solution.solution ?? '',
   });
   const [milestones, setMilestones] = useState<Milestone[]>(Array.isArray(solution.milestones) ? solution.milestones : []);
+  const progress = getMilestoneProgress(milestones, solution.progress ?? 0);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+
+  // drag state
+  const dragIndex = React.useRef<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
+
+  const onDragStart = (i: number) => { dragIndex.current = i; };
+  const onDragEnter = (i: number) => { setDragOver(i); };
+  const onDragEnd   = () => {
+    if (dragIndex.current !== null && dragOver !== null && dragIndex.current !== dragOver) {
+      setMilestones(ms => {
+        const next = [...ms];
+        const [moved] = next.splice(dragIndex.current!, 1);
+        next.splice(dragOver, 0, moved);
+        return next;
+      });
+    }
+    dragIndex.current = null;
+    setDragOver(null);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -159,10 +184,12 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         name: form.name,
         tagline: form.tagline,
         status: form.status,
-        progress: Number(form.progress),
+        progress,
         users: Number(form.users),
         valuation: form.valuation,
         url: form.url,
+        problem: form.problem.trim(),
+        description: form.description.trim(),
         milestones: milestones,
         last_update: form.last_update || new Date().toISOString().split('T')[0],
       })
@@ -205,7 +232,10 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         </Row>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <Row label="Progress (%)">
-            <input style={inp} type="number" min="0" max="100" value={form.progress} onChange={e => setForm(f => ({ ...f, progress: e.target.value }))} />
+            <div style={{ ...inp, display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+              <span>{milestones.filter(m => m.done).length}/{milestones.length}</span>
+              <strong style={{ color: 'var(--text-primary)' }}>{progress}%</strong>
+            </div>
           </Row>
           <Row label="Users">
             <input style={inp} type="number" min="0" value={form.users} onChange={e => setForm(f => ({ ...f, users: e.target.value }))} />
@@ -220,11 +250,51 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
         <Row label="Last Update">
           <input style={inp} type="date" value={form.last_update?.split('T')[0] ?? ''} onChange={e => setForm(f => ({ ...f, last_update: e.target.value }))} />
         </Row>
+        <Row label="Problem">
+          <textarea
+            style={{ ...inp, minHeight: '82px', resize: 'vertical', lineHeight: 1.55 }}
+            value={form.problem}
+            onChange={e => setForm(f => ({ ...f, problem: e.target.value }))}
+            placeholder="The real problem this project solves..."
+          />
+        </Row>
+        <Row label="Solution">
+          <textarea
+            style={{ ...inp, minHeight: '82px', resize: 'vertical', lineHeight: 1.55 }}
+            value={form.description}
+            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+            placeholder="What you built to solve it..."
+          />
+        </Row>
 
         <Row label="Milestones">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {milestones.map((m, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                key={i}
+                draggable
+                onDragStart={() => onDragStart(i)}
+                onDragEnter={() => onDragEnter(i)}
+                onDragOver={e => e.preventDefault()}
+                onDragEnd={onDragEnd}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '6px 8px',
+                  background: dragOver === i ? 'var(--accent-dim)' : 'transparent',
+                  border: dragOver === i ? '1px solid var(--accent)' : '1px solid transparent',
+                  borderRadius: '8px',
+                  transition: 'background 0.15s, border-color 0.15s',
+                  cursor: 'grab',
+                  userSelect: 'none',
+                }}
+              >
+                {/* drag handle */}
+                <span
+                  title="Drag to reorder"
+                  style={{ color: 'var(--text-muted)', fontSize: '16px', flexShrink: 0, cursor: 'grab', lineHeight: 1 }}
+                >
+                  ⠿
+                </span>
                 <input
                   type="checkbox"
                   checked={m.done}
@@ -233,7 +303,7 @@ function EditModal({ solution, onClose, onSaved }: { solution: Solution; onClose
                     newM[i] = { ...newM[i], done: e.target.checked };
                     setMilestones(newM);
                   }}
-                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
                 />
                 <input
                   style={{ ...inp, flex: 1, padding: '6px 10px' }}
@@ -311,6 +381,41 @@ export default function AdminDashboard() {
   const [deleteMsg, setDeleteMsg]     = useState('');
   const [dark, setDark]               = useState(false);
 
+  // Solutions drag-and-drop
+  const solDragIndex = React.useRef<number | null>(null);
+  const [solDragOver, setSolDragOver] = useState<number | null>(null);
+  const [orderSaving, setOrderSaving] = useState(false);
+  const [orderMsg, setOrderMsg]       = useState('');
+
+  const onSolDragStart = (i: number) => { solDragIndex.current = i; };
+  const onSolDragEnter = (i: number) => { setSolDragOver(i); };
+  const onSolDragEnd   = () => {
+    if (solDragIndex.current !== null && solDragOver !== null && solDragIndex.current !== solDragOver) {
+      setSolutions(prev => {
+        const next = [...prev];
+        const [moved] = next.splice(solDragIndex.current!, 1);
+        next.splice(solDragOver, 0, moved);
+        return next;
+      });
+    }
+    solDragIndex.current = null;
+    setSolDragOver(null);
+  };
+
+  const saveOrder = async () => {
+    setOrderSaving(true);
+    setOrderMsg('');
+    const updates = solutions.map((s, i) =>
+      supabase.from('solutions').update({ display_order: i }).eq('id', s.id)
+    );
+    const results = await Promise.all(updates);
+    const err = results.find(r => r.error);
+    setOrderSaving(false);
+    if (err?.error) { setOrderMsg('Error: ' + err.error.message); return; }
+    setOrderMsg('Order saved!');
+    setTimeout(() => setOrderMsg(''), 2500);
+  };
+
   // Restore saved theme on mount
   useEffect(() => {
     const saved = localStorage.getItem('theme');
@@ -329,7 +434,7 @@ export default function AdminDashboard() {
   const loadAll = async () => {
     setLoading(true);
     const [{ data: sols }, { data: bl }, { data: subs }] = await Promise.all([
-      supabase.from('solutions').select('*').order('created_at', { ascending: true }),
+      supabase.from('solutions').select('*').order('display_order', { ascending: true, nullsFirst: false }).order('created_at', { ascending: true }),
       supabase.from('blogs').select('id,title,slug,published,created_at,author').order('created_at', { ascending: false }),
       supabase.from('subscribers').select('*').order('created_at', { ascending: false }),
     ]);
@@ -530,17 +635,49 @@ export default function AdminDashboard() {
             )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700 }}>All Solutions ({solutions.length})</h2>
-              <a href="/createbuilt" style={{ ...btnPrimary, textDecoration: 'none' }}>+ Add New</a>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {orderMsg && (
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: orderMsg.startsWith('Error') ? '#b93a3a' : '#4a9e6b' }}>{orderMsg}</span>
+                )}
+                <button style={btnGhost} onClick={saveOrder} disabled={orderSaving}>
+                  {orderSaving ? 'Saving…' : '💾 Save Order'}
+                </button>
+                <a href="/createbuilt" style={{ ...btnPrimary, textDecoration: 'none' }}>+ Add New</a>
+              </div>
             </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '1rem', marginTop: '-0.75rem' }}>Drag the ⠿ handle to reorder, then click Save Order.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {solutions.map(s => {
+              {solutions.map((s, solIdx) => {
                 const st = statusColor[s.status] || statusColor['planned'];
                 const milestones: Milestone[] = Array.isArray(s.milestones) ? s.milestones : [];
                 const doneMilestones = milestones.filter(m => m.done).length;
+                const progress = getMilestoneProgress(milestones, s.progress ?? 0);
                 return (
-                  <div key={s.id} style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div
+                    key={s.id}
+                    draggable
+                    onDragStart={() => onSolDragStart(solIdx)}
+                    onDragEnter={() => onSolDragEnter(solIdx)}
+                    onDragOver={e => e.preventDefault()}
+                    onDragEnd={onSolDragEnd}
+                    style={{
+                      ...cardStyle,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                      background: solDragOver === solIdx ? 'var(--accent-dim)' : 'var(--bg-card)',
+                      border: solDragOver === solIdx ? '1px solid var(--accent)' : '1px solid var(--border)',
+                      transition: 'background 0.15s, border-color 0.15s',
+                      cursor: 'grab',
+                    }}
+                  >
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                      {/* drag handle */}
+                      <span
+                        title="Drag to reorder"
+                        style={{ color: 'var(--text-muted)', fontSize: '20px', cursor: 'grab', flexShrink: 0, lineHeight: 1, marginTop: '2px', userSelect: 'none' }}
+                      >⠿</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
                           <span style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</span>
@@ -557,7 +694,7 @@ export default function AdminDashboard() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px' }}>
                       {[
-                        { label: 'Progress',    value: `${s.progress ?? 0}%` },
+                        { label: 'Progress',    value: `${progress}%` },
                         { label: 'Users',       value: fmt(s.users ?? 0) },
                         { label: 'Valuation',   value: s.valuation || '—' },
                         { label: 'Milestones',  value: `${doneMilestones}/${milestones.length}` },
@@ -571,7 +708,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div style={{ height: '5px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${s.progress ?? 0}%`, background: 'linear-gradient(90deg, var(--accent), #f07040)', borderRadius: '100px' }} />
+                      <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg, var(--accent), #f07040)', borderRadius: '100px' }} />
                     </div>
                   </div>
                 );

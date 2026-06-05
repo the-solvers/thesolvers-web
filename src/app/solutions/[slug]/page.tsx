@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { getMilestoneProgress } from '@/lib/progress';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -21,6 +22,7 @@ type Solution = {
   category?: string;
   tech_stack?: string;
   problem?: string;
+  description?: string;
   solution?: string;
   week_number?: number;
   valuation_since?: string;
@@ -97,12 +99,15 @@ export default function SolutionPage() {
 
   const st = statusColor[solution.status] || statusColor['planned'];
   const milestones: Milestone[] = Array.isArray(solution.milestones) ? solution.milestones : [];
+  const progress = getMilestoneProgress(milestones, solution.progress ?? 0);
   const dateStr = solution.last_update || solution.updated_at || new Date().toISOString();
   const techList = solution.tech_stack
     ? Array.isArray(solution.tech_stack)
       ? solution.tech_stack
       : solution.tech_stack.split(',').map((t: string) => t.trim())
     : [];
+  const problemText = solution.problem?.trim();
+  const solutionText = solution.solution?.trim() || solution.description?.trim();
 
   return (
     <>
@@ -174,12 +179,12 @@ export default function SolutionPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                 <span>Build Progress</span>
-                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{solution.progress ?? 0}%</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{progress}%</span>
               </div>
               <div style={{ height: '8px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%',
-                  width: `${solution.progress ?? 0}%`,
+                  width: `${progress}%`,
                   background: 'linear-gradient(90deg, var(--accent), #f07040)',
                   borderRadius: '100px',
                   transition: 'width 1s ease',
@@ -215,9 +220,9 @@ export default function SolutionPage() {
           </div>
 
           {/* Problem & Solution */}
-          {(solution.problem || solution.solution) && (
-            <div className="solution-problem-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-              {solution.problem && (
+          {(problemText || solutionText) && (
+            <div className="solution-problem-grid" style={{ display: 'grid', gridTemplateColumns: problemText && solutionText ? '1fr 1fr' : '1fr', gap: '14px', marginBottom: '20px' }}>
+              {problemText && (
                 <div style={{
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
                   borderRadius: '16px', padding: '1.75rem',
@@ -226,10 +231,10 @@ export default function SolutionPage() {
                     <span style={{ fontSize: '18px' }}>⚡</span>
                     <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>The Problem</p>
                   </div>
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{solution.problem}</p>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{problemText}</p>
                 </div>
               )}
-              {solution.solution && (
+              {solutionText && (
                 <div style={{
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
                   borderRadius: '16px', padding: '1.75rem',
@@ -238,7 +243,7 @@ export default function SolutionPage() {
                     <span style={{ fontSize: '18px' }}>🔧</span>
                     <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>The Solution</p>
                   </div>
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{solution.solution}</p>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{solutionText}</p>
                 </div>
               )}
             </div>
