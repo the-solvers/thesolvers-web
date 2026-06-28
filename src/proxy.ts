@@ -84,11 +84,10 @@ function buildLoginPage(pathname: string, error = false): NextResponse {
     </div>
     <h2>Admin Access</h2>
     <p class="subtitle">Enter the password to continue.</p>
-    <form method="POST" action="/admin-auth?redirect=\${encodeURIComponent(pathname)}">
+    <form method="POST" action="/admin-auth?redirect=${encodeURIComponent(pathname)}">
       <label>Password</label>
       <input type="password" name="password" placeholder="••••••••" autofocus />
       <button type="submit">Enter →</button>
-      \${error ? '<p class="error">Incorrect password. Try again.</p>' : ''}
     </form>
   </div>
 </body>
