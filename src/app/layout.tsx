@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     site: "@thesolvers",
   },
   verification: {
-    google: "", // Google Search Console verification code yahan daalo
+    google: "zqUNcsiyFebW5icKVOmMjBg27EIQhlUZXbehU39_zls",
   },
 };
 
