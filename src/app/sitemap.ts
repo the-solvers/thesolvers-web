@@ -1,10 +1,12 @@
 import { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://thesolvers.online";
@@ -40,6 +42,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic blog posts from Supabase
   let blogPages: MetadataRoute.Sitemap = [];
   try {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      console.error("Sitemap: Supabase env vars missing, skipping blog posts");
+      return [...staticPages, ...blogPages];
+    }
     const { data: posts } = await supabase
       .from("blogs")
       .select("slug, published_at")
