@@ -36,6 +36,24 @@ export default function Footer() {
         © 2026 TheSolvers. All rights reserved.
       </p>
       </div>
+      <div suppressHydrationWarning style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+        <a href="https://launchbuff.com" target="_blank" rel="noopener noreferrer" title="Featured on LaunchBuff">
+          <img
+            src="https://launchbuff.com/badge-featured-light.svg"
+            alt="Featured on LaunchBuff"
+            width="256"
+            height="80"
+            className="launchbuff-badge-light"
+          />
+          <img
+            src="https://launchbuff.com/badge-featured-dark.svg"
+            alt="Featured on LaunchBuff"
+            width="256"
+            height="80"
+            className="launchbuff-badge-dark"
+          />
+        </a>
+      </div>
     </footer>
   );
 }

@@ -78,6 +78,16 @@ a {
   text-decoration: none;
 }
 
+.launchbuff-badge-dark {
+  display: none;
+}
+html.dark .launchbuff-badge-light {
+  display: none;
+}
+html.dark .launchbuff-badge-dark {
+  display: block;
+}
+
 nav {
   border: none !important;
   outline: none !important;
