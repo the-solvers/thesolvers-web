@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://thesolvers.online"),
   title: {
-    default: "TheSolvers — Building 100 Products That Solve Real Problems",
+    default: "TheSolvers Building 100 Products That Solve Real Problems",
     template: "%s | TheSolvers",
   },
   description:
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://thesolvers.online",
     siteName: "TheSolvers",
-    title: "TheSolvers — Building 100 Products That Solve Real Problems",
+    title: "TheSolvers Building 100 Products That Solve Real Problems",
     description:
       "100 real problems. 100 real products. 100 weeks. Follow our build-in-public journey of solving everyday frustrations — documented honestly, no marketing spin.",
     images: [
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TheSolvers — Building 100 Products That Solve Real Problems",
+    title: "TheSolvers Building 100 Products That Solve Real Problems",
     description:
       "100 real problems. 100 real products. 100 weeks. Follow our build-in-public journey.",
     images: ["/og-image.png"],
